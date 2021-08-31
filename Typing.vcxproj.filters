@@ -36,5 +36,16 @@
     <Media Include="sound2.wav">
       <Filter>リソース ファイル</Filter>
     </Media>
+    <Media Include="resources\sound1.wav">
+      <Filter>リソース ファイル</Filter>
+    </Media>
+    <Media Include="resources\sound2.wav">
+      <Filter>リソース ファイル</Filter>
+    </Media>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="resources\background.jpg">
+      <Filter>リソース ファイル</Filter>
+    </Image>
   </ItemGroup>
 </Project>

@@ -50,9 +50,17 @@ END
 // WAVE
 //
 
-IDR_WAVE1               WAVE                    "sound1.wav"
+IDR_WAVE1               WAVE                    "resources\\sound1.wav"
 
-IDR_WAVE2               WAVE                    "sound2.wav"
+IDR_WAVE2               WAVE                    "resources\\sound2.wav"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// JPEG
+//
+
+IDR_JPEG1               JPEG                    "resources\\background.jpg"
 
 
 /////////////////////////////////////////////////////////////////////////////

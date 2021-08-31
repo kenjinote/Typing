@@ -5,6 +5,7 @@
 #pragma comment(lib, "dwrite")
 #pragma comment(lib, "dsound")
 #pragma comment(lib, "legacy_stdio_definitions")
+#pragma comment(lib, "windowscodecs.lib")
 
 #import "C:\Program Files (x86)\Common Files\Microsoft Shared\DAO\dao360.dll" rename_namespace("DAO") rename("EOF", "adoEOF")
 #import "C:\Program Files (x86)\Common Files\System\ado\msado60.tlb" no_namespace rename("EOF", "EndOfFile")
@@ -54,367 +55,370 @@ struct kana
 	DATE priority;
 };
 
-std::map<std::wstring, kana> rome{
+std::map<std::wstring, kana> g_rome{
 	{L"A",{L"ア",0.0}},
-{L"BA",{L"バ",0.0}},
-{L"BBA",{L"ッバ",0.0}},
-{L"BBE",{L"ッベ",0.0}},
-{L"BBI",{L"ッビ",0.0}},
-{L"BBO",{L"ッボ",0.0}},
-{L"BBU",{L"ッブ",0.0}},
-{L"BBYA",{L"ッビャ",0.0}},
-{L"BBYE",{L"ッビェ",0.0}},
-{L"BBYI",{L"ッビィ",0.0}},
-{L"BBYO",{L"ッビョ",0.0}},
-{L"BBYU",{L"ッビュ",0.0}},
-{L"BE",{L"ベ",0.0}},
-{L"BI",{L"ビ",0.0}},
-{L"BO",{L"ボ",0.0}},
-{L"BU",{L"ブ",0.0}},
-{L"BYA",{L"ビャ",0.0}},
-{L"BYE",{L"ビェ",0.0}},
-{L"BYI",{L"ビィ",0.0}},
-{L"BYO",{L"ビョ",0.0}},
-{L"BYU",{L"ビュ",0.0}},
-{L"CA",{L"カ",0.0}},
-{L"CE",{L"セ",0.0}},
-{L"CHA",{L"チャ",0.0}},
-{L"CHE",{L"チェ",0.0}},
-{L"CHI",{L"チ",0.0}},
-{L"CHO",{L"チョ",0.0}},
-{L"CHU",{L"チュ",0.0}},
-{L"CI",{L"シ",0.0}},
-{L"CO",{L"コ",0.0}},
-{L"CU",{L"ク",0.0}},
-{L"DA",{L"ダ",0.0}},
-{L"DDA",{L"ッダ",0.0}},
-{L"DDE",{L"ッデ",0.0}},
-{L"DDI",{L"ッヂ",0.0}},
-{L"DDO",{L"ッド",0.0}},
-{L"DDU",{L"ッヅ",0.0}},
-{L"DE",{L"デ",0.0}},
-{L"DHA",{L"デャ",0.0}},
-{L"DHE",{L"デェ",0.0}},
-{L"DHI",{L"ディ",0.0}},
-{L"DHO",{L"デョ",0.0}},
-{L"DHU",{L"デュ",0.0}},
-{L"DI",{L"ディ",0.0}},
-{L"DJI",{L"ヂ",0.0}},
-{L"DO",{L"ド",0.0}},
-{L"DU",{L"ヅ",0.0}},
-{L"DWA",{L"ドァ",0.0}},
-{L"DWE",{L"ドェ",0.0}},
-{L"DWI",{L"ドィ",0.0}},
-{L"DWO",{L"ドォ",0.0}},
-{L"DWU",{L"ドゥ",0.0}},
-{L"DYA",{L"ヂャ",0.0}},
-{L"DYE",{L"ヂェ",0.0}},
-{L"DYI",{L"ヂィ",0.0}},
-{L"DYO",{L"ヂョ",0.0}},
-{L"DYU",{L"ヂュ",0.0}},
-{L"DZU",{L"ヅ",0.0}},
-{L"E",{L"エ",0.0}},
-{L"FA",{L"ファ",0.0}},
-{L"FE",{L"フェ",0.0}},
-{L"FFA",{L"ッファ",0.0}},
-{L"FFE",{L"ッフェ",0.0}},
-{L"FFI",{L"ッフィ",0.0}},
-{L"FFO",{L"ッフォ",0.0}},
-{L"FFU",{L"ッフ",0.0}},
-{L"FI",{L"フィ",0.0}},
-{L"FO",{L"フォ",0.0}},
-{L"FU",{L"フ",0.0}},
-{L"FWA",{L"ファ",0.0}},
-{L"FWE",{L"フェ",0.0}},
-{L"FWI",{L"フィ",0.0}},
-{L"FWO",{L"フォ",0.0}},
-{L"FWU",{L"フゥ",0.0}},
-{L"FYA",{L"フャ",0.0}},
-{L"FYE",{L"フェ",0.0}},
-{L"FYI",{L"フィ",0.0}},
-{L"FYO",{L"フョ",0.0}},
-{L"FYU",{L"フュ",0.0}},
-{L"GA",{L"ガ",0.0}},
-{L"GE",{L"ゲ",0.0}},
-{L"GGA",{L"ッガ",0.0}},
-{L"GGE",{L"ッゲ",0.0}},
-{L"GGI",{L"ッギ",0.0}},
-{L"GGO",{L"ッゴ",0.0}},
-{L"GGU",{L"ッグ",0.0}},
-{L"GI",{L"ギ",0.0}},
-{L"GO",{L"ゴ",0.0}},
-{L"GU",{L"グ",0.0}},
-{L"GWA",{L"グァ",0.0}},
-{L"GWE",{L"グェ",0.0}},
-{L"GWI",{L"グィ",0.0}},
-{L"GWO",{L"グォ",0.0}},
-{L"GWU",{L"グゥ",0.0}},
-{L"GYA",{L"ギャ",0.0}},
-{L"GYE",{L"ギェ",0.0}},
-{L"GYI",{L"ギィ",0.0}},
-{L"GYO",{L"ギョ",0.0}},
-{L"GYU",{L"ギュ",0.0}},
-{L"HA",{L"ハ",0.0}},
-{L"HE",{L"ヘ",0.0}},
-{L"HHA",{L"ッハ",0.0}},
-{L"HHE",{L"ッヘ",0.0}},
-{L"HHI",{L"ッヒ",0.0}},
-{L"HHO",{L"ッポ",0.0}},
-{L"HHU",{L"ッフ",0.0}},
-{L"HI",{L"ヒ",0.0}},
-{L"HO",{L"ホ",0.0}},
-{L"HU",{L"フ",0.0}},
-{L"HYA",{L"ヒャ",0.0}},
-{L"HYO",{L"ヒョ",0.0}},
-{L"HYU",{L"ヒュ",0.0}},
-{L"I",{L"イ",0.0}},
-{L"JA",{L"ジャ",0.0}},
-{L"JE",{L"ジェ",0.0}},
-{L"JI",{L"ジ",0.0}},
-{L"JI",{L"ヂ",0.0}},
-{L"JJA",{L"ッジャ",0.0}},
-{L"JJE",{L"ッジェ",0.0}},
-{L"JJI",{L"ッジ",0.0}},
-{L"JJO",{L"ッジォ",0.0}},
-{L"JJU",{L"ッジュ",0.0}},
-{L"JJYA",{L"ッジャ",0.0}},
-{L"JJYE",{L"ッジェ",0.0}},
-{L"JJYI",{L"ッジィ",0.0}},
-{L"JJYO",{L"ッジョ",0.0}},
-{L"JJYU",{L"ッジュ",0.0}},
-{L"JO",{L"ジョ",0.0}},
-{L"JU",{L"ジュ",0.0}},
-{L"JYA",{L"ジャ",0.0}},
-{L"JYE",{L"ジェ",0.0}},
-{L"JYI",{L"ジィ",0.0}},
-{L"JYO",{L"ジョ",0.0}},
-{L"JYU",{L"ジュ",0.0}},
-{L"KA",{L"カ",0.0}},
-{L"KE",{L"ケ",0.0}},
-{L"KI",{L"キ",0.0}},
-{L"KKA",{L"ッカ",0.0}},
-{L"KKE",{L"ッケ",0.0}},
-{L"KKI",{L"ッキ",0.0}},
-{L"KKO",{L"ッコ",0.0}},
-{L"KKU",{L"ック",0.0}},
-{L"KO",{L"コ",0.0}},
-{L"KU",{L"ク",0.0}},
-{L"KYA",{L"キャ",0.0}},
-{L"KYO",{L"キョ",0.0}},
-{L"KYU",{L"キュ",0.0}},
-{L"LA",{L"ァ",0.0}},
-{L"LE",{L"ェ",0.0}},
-{L"LI",{L"ィ",0.0}},
-{L"LLA",{L"ッァ",0.0}},
-{L"LLE",{L"ッェ",0.0}},
-{L"LLI",{L"ッィ",0.0}},
-{L"LLO",{L"ッォ",0.0}},
-{L"LLU",{L"ッゥ",0.0}},
-{L"LO",{L"ォ",0.0}},
-{L"LTU",{L"ッ",0.0}},
-{L"LU",{L"ゥ",0.0}},
-{L"LYA",{L"ャ",0.0}},
-{L"LYE",{L"ェ",0.0}},
-{L"LYI",{L"ィ",0.0}},
-{L"LYO",{L"ョ",0.0}},
-{L"LYU",{L"ュ",0.0}},
-{L"MA",{L"マ",0.0}},
-{L"ME",{L"メ",0.0}},
-{L"MI",{L"ミ",0.0}},
-{L"MMA",{L"ッマ",0.0}},
-{L"MME",{L"ッメ",0.0}},
-{L"MMI",{L"ッミ",0.0}},
-{L"MMO",{L"ッモ",0.0}},
-{L"MMU",{L"ッム",0.0}},
-{L"MO",{L"モ",0.0}},
-{L"MU",{L"ム",0.0}},
-{L"MYA",{L"ミャ",0.0}},
-{L"MYO",{L"ミョ",0.0}},
-{L"MYU",{L"ミュ",0.0}},
-{L"NA",{L"ナ",0.0}},
-{L"NE",{L"ネ",0.0}},
-{L"NI",{L"ニ",0.0}},
-{L"NN",{L"ン",0.0}},
-{L"NO",{L"ノ",0.0}},
-{L"NU",{L"ヌ",0.0}},
-{L"NYA",{L"ニャ",0.0}},
-{L"NYO",{L"ニョ",0.0}},
-{L"NYU",{L"ニュ",0.0}},
-{L"O",{L"オ",0.0}},
-{L"PA",{L"パ",0.0}},
-{L"PE",{L"ペ",0.0}},
-{L"PI",{L"ピ",0.0}},
-{L"PO",{L"ポ",0.0}},
-{L"PPA",{L"ッバ",0.0}},
-{L"PPE",{L"ッベ",0.0}},
-{L"PPI",{L"ッピ",0.0}},
-{L"PPO",{L"ッポ",0.0}},
-{L"PPU",{L"ップ",0.0}},
-{L"PU",{L"プ",0.0}},
-{L"PYA",{L"ピャ",0.0}},
-{L"PYE",{L"ピェ",0.0}},
-{L"PYI",{L"ピィ",0.0}},
-{L"PYO",{L"ピョ",0.0}},
-{L"PYU",{L"ピュ",0.0}},
-{L"QA",{L"クァ",0.0}},
-{L"QE",{L"クェ",0.0}},
-{L"QI",{L"クィ",0.0}},
-{L"QO",{L"クォ",0.0}},
-{L"QQA",{L"ックァ",0.0}},
-{L"QQE",{L"ックェ",0.0}},
-{L"QQI",{L"ックィ",0.0}},
-{L"QQO",{L"ックォ",0.0}},
-{L"QQU",{L"ック",0.0}},
-{L"QQYA",{L"ックャ",0.0}},
-{L"QQYE",{L"ックェ",0.0}},
-{L"QQYI",{L"ックィ",0.0}},
-{L"QQYO",{L"ックョ",0.0}},
-{L"QQYU",{L"ックュ",0.0}},
-{L"QU",{L"クゥ",0.0}},
-{L"QWA",{L"クァ",0.0}},
-{L"QWE",{L"クェ",0.0}},
-{L"QWI",{L"クィ",0.0}},
-{L"QWO",{L"クォ",0.0}},
-{L"QWU",{L"クゥ",0.0}},
-{L"QYA",{L"クャ",0.0}},
-{L"QYE",{L"クェ",0.0}},
-{L"QYI",{L"クィ",0.0}},
-{L"QYO",{L"クョ",0.0}},
-{L"QYU",{L"クュ",0.0}},
-{L"RA",{L"ラ",0.0}},
-{L"RE",{L"レ",0.0}},
-{L"RI",{L"リ",0.0}},
-{L"RO",{L"ロ",0.0}},
-{L"RRA",{L"ッラ",0.0}},
-{L"RRE",{L"ッレ",0.0}},
-{L"RRI",{L"ッリ",0.0}},
-{L"RRO",{L"ッロ",0.0}},
-{L"RRU",{L"ッル",0.0}},
-{L"RU",{L"ル",0.0}},
-{L"RYA",{L"リャ",0.0}},
-{L"RYO",{L"リョ",0.0}},
-{L"RYU",{L"リュ",0.0}},
-{L"SA",{L"サ",0.0}},
-{L"SE",{L"セ",0.0}},
-{L"SHA",{L"シャ",0.0}},
-{L"SHE",{L"シェ",0.0}},
-{L"SHI",{L"シ",0.0}},
-{L"SHO",{L"ショ",0.0}},
-{L"SHU",{L"シュ",0.0}},
-{L"SI",{L"シ",0.0}},
-{L"SO",{L"ソ",0.0}},
-{L"SSA",{L"ッサ",0.0}},
-{L"SSE",{L"ッセ",0.0}},
-{L"SSI",{L"ッシ",0.0}},
-{L"SSO",{L"ッソ",0.0}},
-{L"SSU",{L"ッス",0.0}},
-{L"SU",{L"ス",0.0}},
-{L"SWA",{L"スァ",0.0}},
-{L"SWE",{L"スェ",0.0}},
-{L"SWI",{L"スィ",0.0}},
-{L"SWO",{L"スォ",0.0}},
-{L"SWU",{L"スゥ",0.0}},
-{L"SYA",{L"シャ",0.0}},
-{L"SYE",{L"シェ",0.0}},
-{L"SYI",{L"シィ",0.0}},
-{L"SYO",{L"ショ",0.0}},
-{L"SYU",{L"シュ",0.0}},
-{L"TA",{L"タ",0.0}},
-{L"TE",{L"テ",0.0}},
-{L"THA",{L"テャ",0.0}},
-{L"THE",{L"テェ",0.0}},
-{L"THI",{L"ティ",0.0}},
-{L"THO",{L"テョ",0.0}},
-{L"THU",{L"テュ",0.0}},
-{L"TI",{L"チ",0.0}},
-{L"TO",{L"ト",0.0}},
-{L"TSA",{L"ツァ",0.0}},
-{L"TSE",{L"ツェ",0.0}},
-{L"TSI",{L"ツィ",0.0}},
-{L"TSO",{L"ツォ",0.0}},
-{L"TSU",{L"ツ",0.0}},
-{L"TTA",{L"ッタ",0.0}},
-{L"TTE",{L"ッテ",0.0}},
-{L"TTI",{L"ッチ",0.0}},
-{L"TTO",{L"ット",0.0}},
-{L"TTU",{L"ッツ",0.0}},
-{L"TU",{L"ツ",0.0}},
-{L"TWA",{L"トァ",0.0}},
-{L"TWE",{L"トェ",0.0}},
-{L"TWI",{L"トィ",0.0}},
-{L"TWO",{L"トォ",0.0}},
-{L"TWU",{L"トゥ",0.0}},
-{L"TYA",{L"チャ",0.0}},
-{L"TYE",{L"チェ",0.0}},
-{L"TYI",{L"チィ",0.0}},
-{L"TYO",{L"チョ",0.0}},
-{L"TYU",{L"チュ",0.0}},
-{L"U",{L"ウ",0.0}},
-{L"VU",{L"ヴ",0.0}},
-{L"WA",{L"ワ",0.0}},
-{L"WE",{L"ウェ",0.0}},
-{L"WHA",{L"ウァ",0.0}},
-{L"WHE",{L"ウェ",0.0}},
-{L"WHI",{L"ウィ",0.0}},
-{L"WHO",{L"ウォ",0.0}},
-{L"WHU",{L"ウ",0.0}},
-{L"WI",{L"ウィ",0.0}},
-{L"WO",{L"ヲ",0.0}},
-{L"WWA",{L"ッワ",0.0}},
-{L"WWE",{L"ッウェ",0.0}},
-{L"WWI",{L"ッウィ",0.0}},
-{L"WWO",{L"ッヲ",0.0}},
-{L"WWU",{L"ッウ",0.0}},
-{L"XA",{L"ァ",0.0}},
-{L"XE",{L"ェ",0.0}},
-{L"XI",{L"ィ",0.0}},
-{L"XN",{L"ン",0.0}},
-{L"XO",{L"ォ",0.0}},
-{L"XTU",{L"ッ",0.0}},
-{L"XU",{L"ゥ",0.0}},
-{L"XXA",{L"ッァ",0.0}},
-{L"XXE",{L"ッェ",0.0}},
-{L"XXI",{L"ッィ",0.0}},
-{L"XXO",{L"ッォ",0.0}},
-{L"XXU",{L"ッゥ",0.0}},
-{L"XXYA",{L"ッャ",0.0}},
-{L"XXYE",{L"ッェ",0.0}},
-{L"XXYI",{L"ッィ",0.0}},
-{L"XXYO",{L"ッョ",0.0}},
-{L"XXYU",{L"ッュ",0.0}},
-{L"XYA",{L"ャ",0.0}},
-{L"XYE",{L"ェ",0.0}},
-{L"XYI",{L"ィ",0.0}},
-{L"XYO",{L"ョ",0.0}},
-{L"XYU",{L"ュ",0.0}},
-{L"YA",{L"ヤ",0.0}},
-{L"YE",{L"イェ",0.0}},
-{L"YO",{L"ヨ",0.0}},
-{L"YU",{L"ユ",0.0}},
-{L"YYA",{L"ッヤ",0.0}},
-{L"YYE",{L"ッイェ",0.0}},
-{L"YYI",{L"ッイ",0.0}},
-{L"YYO",{L"ッヨ",0.0}},
-{L"YYU",{L"ッユ",0.0}},
-{L"ZA",{L"ザ",0.0}},
-{L"ZE",{L"ゼ",0.0}},
-{L"ZO",{L"ゾ",0.0}},
-{L"ZU",{L"ズ",0.0}},
-{L"ZYA",{L"ジャ",0.0}},
-{L"ZYE",{L"ジェ",0.0}},
-{L"ZYI",{L"ジィ",0.0}},
-{L"ZYO",{L"ジョ",0.0}},
-{L"ZYU",{L"ジュ",0.0}},
-{L"ZZA",{L"ッザ",0.0}},
-{L"ZZE",{L"ッゼ",0.0}},
-{L"ZZI",{L"ッジ",0.0}},
-{L"ZZO",{L"ッゾ",0.0}},
-{L"ZZU",{L"ッズ",0.0}},
-{L"ZZYA",{L"ッジャ",0.0}},
-{L"ZZYE",{L"ッジェ",0.0}},
-{L"ZZYI",{L"ッジィ",0.0}},
-{L"ZZYO",{L"ッジョ",0.0}},
-{L"ZZYU",{L"ッジュ",0.0}},
+	{L"BA",{L"バ",0.0}},
+	{L"BBA",{L"ッバ",0.0}},
+	{L"BBE",{L"ッベ",0.0}},
+	{L"BBI",{L"ッビ",0.0}},
+	{L"BBO",{L"ッボ",0.0}},
+	{L"BBU",{L"ッブ",0.0}},
+	{L"BBYA",{L"ッビャ",0.0}},
+	{L"BBYE",{L"ッビェ",0.0}},
+	{L"BBYI",{L"ッビィ",0.0}},
+	{L"BBYO",{L"ッビョ",0.0}},
+	{L"BBYU",{L"ッビュ",0.0}},
+	{L"BE",{L"ベ",0.0}},
+	{L"BI",{L"ビ",0.0}},
+	{L"BO",{L"ボ",0.0}},
+	{L"BU",{L"ブ",0.0}},
+	{L"BYA",{L"ビャ",0.0}},
+	{L"BYE",{L"ビェ",0.0}},
+	{L"BYI",{L"ビィ",0.0}},
+	{L"BYO",{L"ビョ",0.0}},
+	{L"BYU",{L"ビュ",0.0}},
+	{L"CA",{L"カ",0.0}},
+	{L"CE",{L"セ",0.0}},
+	{L"CHA",{L"チャ",0.0}},
+	{L"CHE",{L"チェ",0.0}},
+	{L"CHI",{L"チ",0.0}},
+	{L"CHO",{L"チョ",0.0}},
+	{L"CHU",{L"チュ",0.0}},
+	{L"CI",{L"シ",0.0}},
+	{L"CO",{L"コ",0.0}},
+	{L"CU",{L"ク",0.0}},
+	{L"DA",{L"ダ",0.0}},
+	{L"DDA",{L"ッダ",0.0}},
+	{L"DDE",{L"ッデ",0.0}},
+	{L"DDI",{L"ッヂ",0.0}},
+	{L"DDO",{L"ッド",0.0}},
+	{L"DDU",{L"ッヅ",0.0}},
+	{L"DE",{L"デ",0.0}},
+	{L"DHA",{L"デャ",0.0}},
+	{L"DHE",{L"デェ",0.0}},
+	{L"DHI",{L"ディ",0.0}},
+	{L"DHO",{L"デョ",0.0}},
+	{L"DHU",{L"デュ",0.0}},
+	{L"DI",{L"ディ",0.0}},
+	{L"DJI",{L"ヂ",0.0}},
+	{L"DO",{L"ド",0.0}},
+	{L"DU",{L"ヅ",0.0}},
+	{L"DWA",{L"ドァ",0.0}},
+	{L"DWE",{L"ドェ",0.0}},
+	{L"DWI",{L"ドィ",0.0}},
+	{L"DWO",{L"ドォ",0.0}},
+	{L"DWU",{L"ドゥ",0.0}},
+	{L"DYA",{L"ヂャ",0.0}},
+	{L"DYE",{L"ヂェ",0.0}},
+	{L"DYI",{L"ヂィ",0.0}},
+	{L"DYO",{L"ヂョ",0.0}},
+	{L"DYU",{L"ヂュ",0.0}},
+	{L"DZU",{L"ヅ",0.0}},
+	{L"E",{L"エ",0.0}},
+	{L"FA",{L"ファ",0.0}},
+	{L"FE",{L"フェ",0.0}},
+	{L"FFA",{L"ッファ",0.0}},
+	{L"FFE",{L"ッフェ",0.0}},
+	{L"FFI",{L"ッフィ",0.0}},
+	{L"FFO",{L"ッフォ",0.0}},
+	{L"FFU",{L"ッフ",0.0}},
+	{L"FI",{L"フィ",0.0}},
+	{L"FO",{L"フォ",0.0}},
+	{L"FU",{L"フ",0.0}},
+	{L"FWA",{L"ファ",0.0}},
+	{L"FWE",{L"フェ",0.0}},
+	{L"FWI",{L"フィ",0.0}},
+	{L"FWO",{L"フォ",0.0}},
+	{L"FWU",{L"フゥ",0.0}},
+	{L"FYA",{L"フャ",0.0}},
+	{L"FYE",{L"フェ",0.0}},
+	{L"FYI",{L"フィ",0.0}},
+	{L"FYO",{L"フョ",0.0}},
+	{L"FYU",{L"フュ",0.0}},
+	{L"GA",{L"ガ",0.0}},
+	{L"GE",{L"ゲ",0.0}},
+	{L"GGA",{L"ッガ",0.0}},
+	{L"GGE",{L"ッゲ",0.0}},
+	{L"GGI",{L"ッギ",0.0}},
+	{L"GGO",{L"ッゴ",0.0}},
+	{L"GGU",{L"ッグ",0.0}},
+	{L"GI",{L"ギ",0.0}},
+	{L"GO",{L"ゴ",0.0}},
+	{L"GU",{L"グ",0.0}},
+	{L"GWA",{L"グァ",0.0}},
+	{L"GWE",{L"グェ",0.0}},
+	{L"GWI",{L"グィ",0.0}},
+	{L"GWO",{L"グォ",0.0}},
+	{L"GWU",{L"グゥ",0.0}},
+	{L"GYA",{L"ギャ",0.0}},
+	{L"GYE",{L"ギェ",0.0}},
+	{L"GYI",{L"ギィ",0.0}},
+	{L"GYO",{L"ギョ",0.0}},
+	{L"GYU",{L"ギュ",0.0}},
+	{L"HA",{L"ハ",0.0}},
+	{L"HE",{L"ヘ",0.0}},
+	{L"HHA",{L"ッハ",0.0}},
+	{L"HHE",{L"ッヘ",0.0}},
+	{L"HHI",{L"ッヒ",0.0}},
+	{L"HHO",{L"ッポ",0.0}},
+	{L"HHU",{L"ッフ",0.0}},
+	{L"HI",{L"ヒ",0.0}},
+	{L"HO",{L"ホ",0.0}},
+	{L"HU",{L"フ",0.0}},
+	{L"HYA",{L"ヒャ",0.0}},
+	{L"HYO",{L"ヒョ",0.0}},
+	{L"HYU",{L"ヒュ",0.0}},
+	{L"I",{L"イ",0.0}},
+	{L"JA",{L"ジャ",0.0}},
+	{L"JE",{L"ジェ",0.0}},
+	{L"JI",{L"ジ",0.0}},
+	{L"JI",{L"ヂ",0.0}},
+	{L"JJA",{L"ッジャ",0.0}},
+	{L"JJE",{L"ッジェ",0.0}},
+	{L"JJI",{L"ッジ",0.0}},
+	{L"JJO",{L"ッジォ",0.0}},
+	{L"JJU",{L"ッジュ",0.0}},
+	{L"JJYA",{L"ッジャ",0.0}},
+	{L"JJYE",{L"ッジェ",0.0}},
+	{L"JJYI",{L"ッジィ",0.0}},
+	{L"JJYO",{L"ッジョ",0.0}},
+	{L"JJYU",{L"ッジュ",0.0}},
+	{L"JO",{L"ジョ",0.0}},
+	{L"JU",{L"ジュ",0.0}},
+	{L"JYA",{L"ジャ",0.0}},
+	{L"JYE",{L"ジェ",0.0}},
+	{L"JYI",{L"ジィ",0.0}},
+	{L"JYO",{L"ジョ",0.0}},
+	{L"JYU",{L"ジュ",0.0}},
+	{L"KA",{L"カ",0.0}},
+	{L"KE",{L"ケ",0.0}},
+	{L"KI",{L"キ",0.0}},
+	{L"KKA",{L"ッカ",0.0}},
+	{L"KKE",{L"ッケ",0.0}},
+	{L"KKI",{L"ッキ",0.0}},
+	{L"KKO",{L"ッコ",0.0}},
+	{L"KKU",{L"ック",0.0}},
+	{L"KO",{L"コ",0.0}},
+	{L"KU",{L"ク",0.0}},
+	{L"KYA",{L"キャ",0.0}},
+	{L"KYO",{L"キョ",0.0}},
+	{L"KYU",{L"キュ",0.0}},
+	{L"LA",{L"ァ",0.0}},
+	{L"LE",{L"ェ",0.0}},
+	{L"LI",{L"ィ",0.0}},
+	{L"LLA",{L"ッァ",0.0}},
+	{L"LLE",{L"ッェ",0.0}},
+	{L"LLI",{L"ッィ",0.0}},
+	{L"LLO",{L"ッォ",0.0}},
+	{L"LLU",{L"ッゥ",0.0}},
+	{L"LO",{L"ォ",0.0}},
+	{L"LTU",{L"ッ",0.0}},
+	{L"LU",{L"ゥ",0.0}},
+	{L"LYA",{L"ャ",0.0}},
+	{L"LYE",{L"ェ",0.0}},
+	{L"LYI",{L"ィ",0.0}},
+	{L"LYO",{L"ョ",0.0}},
+	{L"LYU",{L"ュ",0.0}},
+	{L"MA",{L"マ",0.0}},
+	{L"ME",{L"メ",0.0}},
+	{L"MI",{L"ミ",0.0}},
+	{L"MMA",{L"ッマ",0.0}},
+	{L"MME",{L"ッメ",0.0}},
+	{L"MMI",{L"ッミ",0.0}},
+	{L"MMO",{L"ッモ",0.0}},
+	{L"MMU",{L"ッム",0.0}},
+	{L"MO",{L"モ",0.0}},
+	{L"MU",{L"ム",0.0}},
+	{L"MYA",{L"ミャ",0.0}},
+	{L"MYO",{L"ミョ",0.0}},
+	{L"MYU",{L"ミュ",0.0}},
+	{L"NA",{L"ナ",0.0}},
+	{L"NE",{L"ネ",0.0}},
+	{L"NI",{L"ニ",0.0}},
+	{L"NN",{L"ン",0.0}},
+	{L"NO",{L"ノ",0.0}},
+	{L"NU",{L"ヌ",0.0}},
+	{L"NYA",{L"ニャ",0.0}},
+	{L"NYO",{L"ニョ",0.0}},
+	{L"NYU",{L"ニュ",0.0}},
+	{L"O",{L"オ",0.0}},
+	{L"PA",{L"パ",0.0}},
+	{L"PE",{L"ペ",0.0}},
+	{L"PI",{L"ピ",0.0}},
+	{L"PO",{L"ポ",0.0}},
+	{L"PPA",{L"ッバ",0.0}},
+	{L"PPE",{L"ッベ",0.0}},
+	{L"PPI",{L"ッピ",0.0}},
+	{L"PPO",{L"ッポ",0.0}},
+	{L"PPU",{L"ップ",0.0}},
+	{L"PU",{L"プ",0.0}},
+	{L"PYA",{L"ピャ",0.0}},
+	{L"PYE",{L"ピェ",0.0}},
+	{L"PYI",{L"ピィ",0.0}},
+	{L"PYO",{L"ピョ",0.0}},
+	{L"PYU",{L"ピュ",0.0}},
+	{L"QA",{L"クァ",0.0}},
+	{L"QE",{L"クェ",0.0}},
+	{L"QI",{L"クィ",0.0}},
+	{L"QO",{L"クォ",0.0}},
+	{L"QQA",{L"ックァ",0.0}},
+	{L"QQE",{L"ックェ",0.0}},
+	{L"QQI",{L"ックィ",0.0}},
+	{L"QQO",{L"ックォ",0.0}},
+	{L"QQU",{L"ック",0.0}},
+	{L"QQYA",{L"ックャ",0.0}},
+	{L"QQYE",{L"ックェ",0.0}},
+	{L"QQYI",{L"ックィ",0.0}},
+	{L"QQYO",{L"ックョ",0.0}},
+	{L"QQYU",{L"ックュ",0.0}},
+	{L"QU",{L"クゥ",0.0}},
+	{L"QWA",{L"クァ",0.0}},
+	{L"QWE",{L"クェ",0.0}},
+	{L"QWI",{L"クィ",0.0}},
+	{L"QWO",{L"クォ",0.0}},
+	{L"QWU",{L"クゥ",0.0}},
+	{L"QYA",{L"クャ",0.0}},
+	{L"QYE",{L"クェ",0.0}},
+	{L"QYI",{L"クィ",0.0}},
+	{L"QYO",{L"クョ",0.0}},
+	{L"QYU",{L"クュ",0.0}},
+	{L"RA",{L"ラ",0.0}},
+	{L"RE",{L"レ",0.0}},
+	{L"RI",{L"リ",0.0}},
+	{L"RO",{L"ロ",0.0}},
+	{L"RRA",{L"ッラ",0.0}},
+	{L"RRE",{L"ッレ",0.0}},
+	{L"RRI",{L"ッリ",0.0}},
+	{L"RRO",{L"ッロ",0.0}},
+	{L"RRU",{L"ッル",0.0}},
+	{L"RU",{L"ル",0.0}},
+	{L"RYA",{L"リャ",0.0}},
+	{L"RYO",{L"リョ",0.0}},
+	{L"RYU",{L"リュ",0.0}},
+	{L"SA",{L"サ",0.0}},
+	{L"SE",{L"セ",0.0}},
+	{L"SHA",{L"シャ",0.0}},
+	{L"SHE",{L"シェ",0.0}},
+	{L"SHI",{L"シ",0.0}},
+	{L"SHO",{L"ショ",0.0}},
+	{L"SHU",{L"シュ",0.0}},
+	{L"SI",{L"シ",0.0}},
+	{L"SO",{L"ソ",0.0}},
+	{L"SSA",{L"ッサ",0.0}},
+	{L"SSE",{L"ッセ",0.0}},
+	{L"SSI",{L"ッシ",0.0}},
+	{L"SSO",{L"ッソ",0.0}},
+	{L"SSU",{L"ッス",0.0}},
+	{L"SU",{L"ス",0.0}},
+	{L"SWA",{L"スァ",0.0}},
+	{L"SWE",{L"スェ",0.0}},
+	{L"SWI",{L"スィ",0.0}},
+	{L"SWO",{L"スォ",0.0}},
+	{L"SWU",{L"スゥ",0.0}},
+	{L"SYA",{L"シャ",0.0}},
+	{L"SYE",{L"シェ",0.0}},
+	{L"SYI",{L"シィ",0.0}},
+	{L"SYO",{L"ショ",0.0}},
+	{L"SYU",{L"シュ",0.0}},
+	{L"TA",{L"タ",0.0}},
+	{L"TE",{L"テ",0.0}},
+	{L"THA",{L"テャ",0.0}},
+	{L"THE",{L"テェ",0.0}},
+	{L"THI",{L"ティ",0.0}},
+	{L"THO",{L"テョ",0.0}},
+	{L"THU",{L"テュ",0.0}},
+	{L"TI",{L"チ",0.0}},
+	{L"TO",{L"ト",0.0}},
+	{L"TSA",{L"ツァ",0.0}},
+	{L"TSE",{L"ツェ",0.0}},
+	{L"TSI",{L"ツィ",0.0}},
+	{L"TSO",{L"ツォ",0.0}},
+	{L"TSU",{L"ツ",0.0}},
+	{L"TTA",{L"ッタ",0.0}},
+	{L"TTE",{L"ッテ",0.0}},
+	{L"TTI",{L"ッチ",0.0}},
+	{L"TTO",{L"ット",0.0}},
+	{L"TTU",{L"ッツ",0.0}},
+	{L"TU",{L"ツ",0.0}},
+	{L"TWA",{L"トァ",0.0}},
+	{L"TWE",{L"トェ",0.0}},
+	{L"TWI",{L"トィ",0.0}},
+	{L"TWO",{L"トォ",0.0}},
+	{L"TWU",{L"トゥ",0.0}},
+	{L"TYA",{L"チャ",0.0}},
+	{L"TYE",{L"チェ",0.0}},
+	{L"TYI",{L"チィ",0.0}},
+	{L"TYO",{L"チョ",0.0}},
+	{L"TYU",{L"チュ",0.0}},
+	{L"U",{L"ウ",0.0}},
+	{L"VU",{L"ヴ",0.0}},
+	{L"WA",{L"ワ",0.0}},
+	{L"WE",{L"ウェ",0.0}},
+	{L"WHA",{L"ウァ",0.0}},
+	{L"WHE",{L"ウェ",0.0}},
+	{L"WHI",{L"ウィ",0.0}},
+	{L"WHO",{L"ウォ",0.0}},
+	{L"WHU",{L"ウ",0.0}},
+	{L"WI",{L"ウィ",0.0}},
+	{L"WO",{L"ヲ",0.0}},
+	{L"WWA",{L"ッワ",0.0}},
+	{L"WWE",{L"ッウェ",0.0}},
+	{L"WWI",{L"ッウィ",0.0}},
+	{L"WWO",{L"ッヲ",0.0}},
+	{L"WWU",{L"ッウ",0.0}},
+	{L"XA",{L"ァ",0.0}},
+	{L"XE",{L"ェ",0.0}},
+	{L"XI",{L"ィ",0.0}},
+	{L"XN",{L"ン",0.0}},
+	{L"XO",{L"ォ",0.0}},
+	{L"XTU",{L"ッ",0.0}},
+	{L"XU",{L"ゥ",0.0}},
+	{L"XXA",{L"ッァ",0.0}},
+	{L"XXE",{L"ッェ",0.0}},
+	{L"XXI",{L"ッィ",0.0}},
+	{L"XXO",{L"ッォ",0.0}},
+	{L"XXU",{L"ッゥ",0.0}},
+	{L"XXYA",{L"ッャ",0.0}},
+	{L"XXYE",{L"ッェ",0.0}},
+	{L"XXYI",{L"ッィ",0.0}},
+	{L"XXYO",{L"ッョ",0.0}},
+	{L"XXYU",{L"ッュ",0.0}},
+	{L"XYA",{L"ャ",0.0}},
+	{L"XYE",{L"ェ",0.0}},
+	{L"XYI",{L"ィ",0.0}},
+	{L"XYO",{L"ョ",0.0}},
+	{L"XYU",{L"ュ",0.0}},
+	{L"YA",{L"ヤ",0.0}},
+	{L"YE",{L"イェ",0.0}},
+	{L"YO",{L"ヨ",0.0}},
+	{L"YU",{L"ユ",0.0}},
+	{L"YYA",{L"ッヤ",0.0}},
+	{L"YYE",{L"ッイェ",0.0}},
+	{L"YYI",{L"ッイ",0.0}},
+	{L"YYO",{L"ッヨ",0.0}},
+	{L"YYU",{L"ッユ",0.0}},
+	{L"ZA",{L"ザ",0.0}},
+	{L"ZE",{L"ゼ",0.0}},
+	{L"ZO",{L"ゾ",0.0}},
+	{L"ZU",{L"ズ",0.0}},
+	{L"ZYA",{L"ジャ",0.0}},
+	{L"ZYE",{L"ジェ",0.0}},
+	{L"ZYI",{L"ジィ",0.0}},
+	{L"ZYO",{L"ジョ",0.0}},
+	{L"ZYU",{L"ジュ",0.0}},
+	{L"ZZA",{L"ッザ",0.0}},
+	{L"ZZE",{L"ッゼ",0.0}},
+	{L"ZZI",{L"ッジ",0.0}},
+	{L"ZZO",{L"ッゾ",0.0}},
+	{L"ZZU",{L"ッズ",0.0}},
+	{L"ZZYA",{L"ッジャ",0.0}},
+	{L"ZZYE",{L"ッジェ",0.0}},
+	{L"ZZYI",{L"ッジィ",0.0}},
+	{L"ZZYO",{L"ッジョ",0.0}},
+	{L"ZZYU",{L"ッジュ",0.0}},
+};
+
+std::map<std::wstring, std::wstring> g_kana{
 };
 
 std::map<std::wstring, std::wstring> words{
@@ -472,11 +476,12 @@ struct game
 {
 	game()
 	{
+		nGameState = GS_TITLE;
 		nCategory = 1;
 		nTypeCount = 0;
 		nMissCount = 0;
 		nQuestionCount = 0;
-		nMaxQuestionCount = 10;
+		nMaxQuestionCount = 2;
 		list.clear();
 	}
 
@@ -489,7 +494,7 @@ struct game
 		nTypeCount = 0;
 		nMissCount = 0;
 		nQuestionCount = 0;
-		nMaxQuestionCount = 10;
+		nMaxQuestionCount = 2;
 		LoadWordsFromDatabase();
 
 		lstrcpy(szQuestionKana, list[nQuestionCount].kana.c_str());
@@ -531,6 +536,7 @@ struct game
 	int nCategory;
 	WCHAR szQuestionKana[256]; // カタカナを配列で用意しておく
 	WCHAR szQuestionRome[1024]; // ローマ字を配列で用意しておく
+	std::vector<int> kanakugiri; // どこで区切るかの情報
 };
 
 template<class Interface> inline void SafeRelease(Interface** ppInterfaceToRelease)
@@ -686,7 +692,7 @@ void CreateKeysDatabaseFile(HWND hWnd)
 			return;
 		}
 
-		for (auto i : rome)
+		for (auto i : g_rome)
 		{
 			WCHAR szSQL[1024];
 			swprintf_s(szSQL, L"INSERT INTO item(rome, kana, priority) VALUES ('%s', '%s', %lf);", i.first.c_str(), i.second.kana1.c_str(), i.second.priority);
@@ -695,6 +701,59 @@ void CreateKeysDatabaseFile(HWND hWnd)
 				DeleteFile(lpszDataBaseFilePath);
 				break;
 			}
+		}
+	}
+
+	{
+		g_kana.clear();
+
+		_ConnectionPtr pCon(NULL);
+		HRESULT hr = pCon.CreateInstance(__uuidof(Connection));
+		if (SUCCEEDED(hr))
+		{
+			TCHAR szString[1024];
+			wsprintf(szString, L"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=%s;", GetKeysDataBaseFilePath());
+			hr = pCon->Open(szString, _bstr_t(""), _bstr_t(""), adOpenUnspecified);
+			if (SUCCEEDED(hr))
+			{
+				try
+				{
+					_RecordsetPtr pRecordset(NULL);
+					hr = pRecordset.CreateInstance(__uuidof(Recordset));
+					if (SUCCEEDED(hr))
+					{
+						_CommandPtr pCommand(NULL);
+						pCommand.CreateInstance(__uuidof(Command));
+						pCommand->ActiveConnection = pCon;
+
+						{
+							WCHAR szSQL[256];
+							lstrcpy(szSQL, L"select * from item order by priority;");
+							pCommand->CommandText = szSQL;
+							pRecordset = pCommand->Execute(NULL, NULL, adCmdText);
+							if (!pRecordset->EndOfFile)
+							{
+								pRecordset->MoveFirst();
+								while (!pRecordset->EndOfFile)
+								{
+									_variant_t rome = pRecordset->Fields->GetItem((long)0)->Value;
+									_variant_t kana = pRecordset->Fields->GetItem((long)1)->Value;
+									g_kana[kana.bstrVal] = rome.bstrVal;
+									pRecordset->MoveNext();
+								}
+							}
+							pRecordset->Close();
+						}
+					}
+					pRecordset = NULL;
+				}
+				catch (_com_error& e)
+				{
+					MessageBox(hWnd, e.Description(), 0, 0);
+				}
+				pCon->Close();
+			}
+			pCon = NULL;
 		}
 	}
 }
@@ -791,105 +850,50 @@ LPWSTR game::GetRomeFromKana(LPCWSTR lpszKana)
 			break;
 		}
 
+		int nStep = 0;
+
+		if (*(p + 1) != 0 && *(p + 2) != 0)
 		{
-			int nStep = 0;
-			BOOL bRet = FALSE;
-			_ConnectionPtr pCon(NULL);
-			HRESULT hr = pCon.CreateInstance(__uuidof(Connection));
-			if (SUCCEEDED(hr))
+			WCHAR szKana[4] = { *p, *(p + 1), *(p + 2), 0 };
+			auto it = g_kana.find(szKana);
+			if (it != g_kana.end())
 			{
-				TCHAR szString[1024];
-				wsprintf(szString, L"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=%s;", GetKeysDataBaseFilePath());
-				hr = pCon->Open(szString, _bstr_t(""), _bstr_t(""), adOpenUnspecified);
-				if (SUCCEEDED(hr))
-				{
-					try
-					{
-						_RecordsetPtr pRecordset(NULL);
-						hr = pRecordset.CreateInstance(__uuidof(Recordset));
-						if (SUCCEEDED(hr))
-						{
-							_CommandPtr pCommand(NULL);
-							pCommand.CreateInstance(__uuidof(Command));
-							pCommand->ActiveConnection = pCon;
-
-							// 3文字探す
-							if (*(p + 1) != 0 && *(p + 2) != 0)
-							{
-								WCHAR szKana[4] = { *p, *(p + 1), *(p + 2), 0 };
-								WCHAR szSQL[256];
-								wsprintf(szSQL, L"select top %d * from item where kana = '%s' order by priority DESC;", 1, szKana);
-								pCommand->CommandText = szSQL;
-								pRecordset = pCommand->Execute(NULL, NULL, adCmdText);
-								if (!pRecordset->EndOfFile)
-								{
-									// 先頭のレコードへ移動
-									pRecordset->MoveFirst();
-									_variant_t rome = pRecordset->Fields->GetItem((long)0)->Value;
-									lstrcat(szRome, rome.bstrVal);
-									nStep = 3;
-									bRet = TRUE;
-								}
-								pRecordset->Close();
-							}
-
-							// 2文字探す
-							if (!bRet && *(p + 1) != 0)
-							{
-								WCHAR szKana[3] = { *p, *(p + 1), 0 };
-								WCHAR szSQL[256];
-								wsprintf(szSQL, L"select top %d * from item where kana = '%s' order by priority DESC;", 1, szKana);
-								pCommand->CommandText = szSQL;
-								pRecordset = pCommand->Execute(NULL, NULL, adCmdText);
-								if (!pRecordset->EndOfFile)
-								{
-									// 先頭のレコードへ移動
-									pRecordset->MoveFirst();
-									_variant_t rome = pRecordset->Fields->GetItem((long)0)->Value;
-									lstrcat(szRome, rome.bstrVal);
-									nStep = 2;
-									bRet = TRUE;
-								}
-								pRecordset->Close();
-							}
-
-							// 1文字探す
-							if (!bRet)
-							{
-								WCHAR szKana[2] = { *p, 0 };
-								WCHAR szSQL[256];
-								wsprintf(szSQL, L"select top %d * from item where kana = '%s' order by priority DESC;", 1, szKana);
-								pCommand->CommandText = szSQL;
-								pRecordset = pCommand->Execute(NULL, NULL, adCmdText);
-								if (!pRecordset->EndOfFile)
-								{
-									// 先頭のレコードへ移動
-									pRecordset->MoveFirst();
-									_variant_t rome = pRecordset->Fields->GetItem((long)0)->Value;
-									lstrcat(szRome, rome.bstrVal);
-									nStep = 1;
-									bRet = TRUE;
-								}
-								pRecordset->Close();
-							}
-						}
-						pRecordset = NULL;
-					}
-					catch (_com_error& e)
-					{
-						MessageBox(hWnd, e.Description(), 0, 0);
-						bRet = FALSE;
-					}
-					pCon->Close();
-				}
-				pCon = NULL;
-			}
-			if (bRet)
-			{
-				p += nStep;
-				continue;
+				lstrcat(szRome, (*it).second.c_str());
+				nStep = 3;
 			}
 		}
+
+		// 2文字探す
+		if (nStep == 0 && *(p + 1) != 0)
+		{
+			WCHAR szKana[3] = { *p, *(p + 1), 0 };
+			auto it = g_kana.find(szKana);
+			if (it != g_kana.end())
+			{
+				lstrcat(szRome, (*it).second.c_str());
+				nStep = 2;
+			}
+		}
+
+		// 1文字探す
+		if (nStep == 0)
+		{
+			WCHAR szKana[2] = { *p, 0 };
+			auto it = g_kana.find(szKana);
+			if (it != g_kana.end())
+			{
+				lstrcat(szRome, (*it).second.c_str());
+				nStep = 1;
+			}
+		}
+
+		if (nStep > 0)
+		{
+			p += nStep;
+			continue;
+		}
+
+		break;
 	}
 	return szRome;
 }
@@ -1067,8 +1071,8 @@ BOOL JudgeKigou(DWORD dwKeyCode, LPCWSTR lpszKana, int nCursor)
 
 BOOL JudgeKana(LPCWSTR lpszInputAlphabet, LPCWSTR lpszKana, int nCursor, LPWSTR lpszOutputKana)
 {
-	std::map<std::wstring, kana>::const_iterator i = rome.lower_bound(lpszInputAlphabet);
-	while (i != rome.end())
+	std::map<std::wstring, kana>::const_iterator i = g_rome.lower_bound(lpszInputAlphabet);
+	while (i != g_rome.end())
 	{
 		const std::wstring& rome = i->first;
 		if (rome.compare(0, lstrlenW(lpszInputAlphabet), lpszInputAlphabet) != 0)
@@ -1163,6 +1167,138 @@ BOOL IsKigo(WCHAR c)
 	return FALSE;
 }
 
+BOOL IsBoin(WCHAR c)
+{
+	switch (c)
+	{
+	case L'A':
+	case L'I':
+	case L'U':
+	case L'E':
+	case L'O':
+		return TRUE;
+	}
+	return FALSE;
+}
+
+HRESULT LoadResourceBitmap(
+	ID2D1RenderTarget* pRenderTarget,
+	IWICImagingFactory* pIWICFactory,
+	PCWSTR resourceName,
+	PCWSTR resourceType,
+	UINT destinationWidth,
+	UINT destinationHeight,
+	ID2D1Bitmap** ppBitmap
+)
+{
+	IWICBitmapDecoder* pDecoder = NULL;
+	IWICBitmapFrameDecode* pSource = NULL;
+	IWICStream* pStream = NULL;
+	IWICFormatConverter* pConverter = NULL;
+	IWICBitmapScaler* pScaler = NULL;
+
+	HRSRC imageResHandle = NULL;
+	HGLOBAL imageResDataHandle = NULL;
+	void* pImageFile = NULL;
+	DWORD imageFileSize = 0;
+
+	// Locate the resource.
+	imageResHandle = FindResourceW(GetModuleHandle(0), resourceName, resourceType);
+	HRESULT hr = imageResHandle ? S_OK : E_FAIL;
+	if (SUCCEEDED(hr))
+	{
+		// Load the resource.
+		imageResDataHandle = LoadResource(GetModuleHandle(0), imageResHandle);
+
+		hr = imageResDataHandle ? S_OK : E_FAIL;
+	}
+
+	if (SUCCEEDED(hr))
+	{
+		// Lock it to get a system memory pointer.
+		pImageFile = LockResource(imageResDataHandle);
+
+		hr = pImageFile ? S_OK : E_FAIL;
+	}
+	if (SUCCEEDED(hr))
+	{
+		// Calculate the size.
+		imageFileSize = SizeofResource(GetModuleHandle(0), imageResHandle);
+
+		hr = imageFileSize ? S_OK : E_FAIL;
+
+	}
+
+	if (SUCCEEDED(hr))
+	{
+		// Create a WIC stream to map onto the memory.
+		hr = pIWICFactory->CreateStream(&pStream);
+	}
+	if (SUCCEEDED(hr))
+	{
+		// Initialize the stream with the memory pointer and size.
+		hr = pStream->InitializeFromMemory(
+			reinterpret_cast<BYTE*>(pImageFile),
+			imageFileSize
+		);
+	}
+
+	if (SUCCEEDED(hr))
+	{
+		// Create a decoder for the stream.
+		hr = pIWICFactory->CreateDecoderFromStream(
+			pStream,
+			NULL,
+			WICDecodeMetadataCacheOnLoad,
+			&pDecoder
+		);
+	}
+
+	if (SUCCEEDED(hr))
+	{
+		// Create the initial frame.
+		hr = pDecoder->GetFrame(0, &pSource);
+	}
+
+	if (SUCCEEDED(hr))
+	{
+		// Convert the image format to 32bppPBGRA
+		// (DXGI_FORMAT_B8G8R8A8_UNORM + D2D1_ALPHA_MODE_PREMULTIPLIED).
+		hr = pIWICFactory->CreateFormatConverter(&pConverter);
+	}
+
+	if (SUCCEEDED(hr))
+	{
+		hr = pConverter->Initialize(
+			pSource,
+			GUID_WICPixelFormat32bppPBGRA,
+			WICBitmapDitherTypeNone,
+			NULL,
+			0.f,
+			WICBitmapPaletteTypeMedianCut
+		);
+
+		if (SUCCEEDED(hr))
+		{
+			//create a Direct2D bitmap from the WIC bitmap.
+			hr = pRenderTarget->CreateBitmapFromWicBitmap(
+				pConverter,
+				NULL,
+				ppBitmap
+			);
+
+		}
+	}
+
+	SafeRelease(&pDecoder);
+	SafeRelease(&pSource);
+	SafeRelease(&pStream);
+	SafeRelease(&pConverter);
+	SafeRelease(&pScaler);
+
+	return hr;
+}
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	static ID2D1Factory* m_pD2DFactory;
@@ -1172,8 +1308,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	static IDWriteTextFormat* m_pTextFormat;
 	static ID2D1SolidColorBrush* m_pBlackBrush;
 	static ID2D1SolidColorBrush* m_pGrayBrush;
-
-	static IDWriteTextLayout* m_pTextLayout;
+	static ID2D1Bitmap* m_pBitmap;
 
 	static HFONT hFont;
 	static UINT uDpiX = DEFAULT_DPI, uDpiY = DEFAULT_DPI;
@@ -1188,7 +1323,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 			CreateKeysDatabaseFile(hWnd);
 
-
 			CreateWordsDatabaseFile(hWnd);
 			static const WCHAR msc_fontName[] = L"Verdana";
 			static const FLOAT msc_fontSize = 50;
@@ -1197,10 +1331,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				hr = DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(m_pDWriteFactory), reinterpret_cast<IUnknown**>(&m_pDWriteFactory));
 			if (SUCCEEDED(hr))
 				hr = m_pDWriteFactory->CreateTextFormat(msc_fontName, 0, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, msc_fontSize, L"", &m_pTextFormat);
-			//if (SUCCEEDED(hr))
-			//	hr = m_pTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_TRAILING);
-			//if (SUCCEEDED(hr))
-			//	hr = m_pTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
+			if (SUCCEEDED(hr))
+				hr = CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_IWICImagingFactory, reinterpret_cast<void**>(&m_pWICFactory));
 			if (FAILED(hr))
 				return -1;
 		}
@@ -1209,7 +1341,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		// ゲーム開始
 		// ランダムで問題を読み込む
 
-		g.start();
+		//g.start();
 
 		break;
 	case WM_SIZE:
@@ -1222,6 +1354,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_DISPLAYCHANGE:
 		InvalidateRect(hWnd, 0, 0);
 		break;
+	case WM_ERASEBKGND:
+		return 1;
 	case WM_PAINT:
 		{
 			HRESULT hr = S_OK;
@@ -1236,6 +1370,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					hr = m_pRenderTarget->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Black), &m_pBlackBrush);
 				if (SUCCEEDED(hr))
 					hr = m_pRenderTarget->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::LightGray), &m_pGrayBrush);
+				if (SUCCEEDED(hr))
+					hr = LoadResourceBitmap(m_pRenderTarget, m_pWICFactory, MAKEINTRESOURCE(IDR_JPEG1), L"JPEG", 200, 0, &m_pBitmap);
 			}
 			if (SUCCEEDED(hr))
 			{
@@ -1244,8 +1380,95 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				m_pRenderTarget->SetTransform(D2D1::Matrix3x2F::Identity());
 				m_pRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::White));
 
-				{// 問題文を表示
-					LPCWSTR lpszText = g.list[g.nQuestionCount].words.c_str();
+				{
+					// ビットマップを描画
+					D2D1_SIZE_F size = m_pBitmap->GetSize();
+					D2D1_POINT_2F upperLeftCorner = D2D1::Point2F(0.0f, 0.0f);
+					m_pRenderTarget->DrawBitmap(m_pBitmap, D2D1::RectF(upperLeftCorner.x, upperLeftCorner.y, upperLeftCorner.x + 120.0f, upperLeftCorner.y + 120.0f));
+				}
+
+				if (g.nGameState == GAME_STATE::GS_GAMESTART)
+				{
+					{// 問題文を表示
+						LPCWSTR lpszText = g.list[g.nQuestionCount].words.c_str();
+						DWRITE_TEXT_METRICS tTextMetrics;
+						{
+							IDWriteTextLayout* pTextLayout = NULL;
+							hr = m_pDWriteFactory->CreateTextLayout(
+								lpszText
+								, lstrlenW(lpszText)
+								, m_pTextFormat
+								, renderTargetSize.width
+								, renderTargetSize.height
+								, &pTextLayout
+							);
+							pTextLayout->GetMetrics(&tTextMetrics);
+
+							m_pRenderTarget->DrawTextLayout(D2D1::Point2F(renderTargetSize.width / 2 - tTextMetrics.width / 2
+								, renderTargetSize.height / 2 - tTextMetrics.height / 2 - 2 * tTextMetrics.height),
+								pTextLayout,
+								m_pBlackBrush,
+								D2D1_DRAW_TEXT_OPTIONS_NO_SNAP);
+
+							SafeRelease(&pTextLayout);
+						}
+					}
+
+					{// カタカナを表示
+						LPCWSTR lpszText = g.list[g.nQuestionCount].kana.c_str();
+						DWRITE_TEXT_METRICS tTextMetrics;
+						{
+							IDWriteTextLayout* pTextLayout = NULL;
+							hr = m_pDWriteFactory->CreateTextLayout(
+								lpszText
+								, lstrlenW(lpszText)
+								, m_pTextFormat
+								, renderTargetSize.width
+								, renderTargetSize.height
+								, &pTextLayout
+							);
+							pTextLayout->GetMetrics(&tTextMetrics);
+
+							DWRITE_TEXT_RANGE textRange = { 0, (UINT32)g.nCursor };
+							pTextLayout->SetDrawingEffect(m_pGrayBrush, textRange);
+
+							m_pRenderTarget->DrawTextLayout(D2D1::Point2F(renderTargetSize.width / 2 - tTextMetrics.width / 2
+								, renderTargetSize.height / 2 - tTextMetrics.height / 2),
+								pTextLayout,
+								m_pBlackBrush,
+								D2D1_DRAW_TEXT_OPTIONS_NO_SNAP);
+
+							SafeRelease(&pTextLayout);
+						}
+					}
+
+					{// ローマ字を表示
+						DWRITE_TEXT_METRICS tTextMetrics;
+						{
+							IDWriteTextLayout* pTextLayout = NULL;
+							hr = m_pDWriteFactory->CreateTextLayout(
+								g.szQuestionRome
+								, lstrlenW(g.szQuestionRome)
+								, m_pTextFormat
+								, renderTargetSize.width
+								, renderTargetSize.height
+								, &pTextLayout
+							);
+							pTextLayout->GetMetrics(&tTextMetrics);
+
+							m_pRenderTarget->DrawTextLayout(D2D1::Point2F(renderTargetSize.width / 2 - tTextMetrics.width / 2
+								, renderTargetSize.height / 2 - tTextMetrics.height / 2 + tTextMetrics.height),
+								pTextLayout,
+								m_pBlackBrush,
+								D2D1_DRAW_TEXT_OPTIONS_NO_SNAP);
+
+							SafeRelease(&pTextLayout);
+						}
+					}
+				}
+				else if (g.nGameState == GAME_STATE::GS_GAMEEND)
+				{
+					LPCWSTR lpszText = L"Game Over";
 					DWRITE_TEXT_METRICS tTextMetrics;
 					{
 						IDWriteTextLayout* pTextLayout = NULL;
@@ -1258,22 +1481,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 							, &pTextLayout
 						);
 						pTextLayout->GetMetrics(&tTextMetrics);
+
+						m_pRenderTarget->DrawTextLayout(D2D1::Point2F(renderTargetSize.width / 2 - tTextMetrics.width / 2
+							, renderTargetSize.height / 2 - tTextMetrics.height / 2),
+							pTextLayout,
+							m_pBlackBrush,
+							D2D1_DRAW_TEXT_OPTIONS_NO_SNAP);
+
 						SafeRelease(&pTextLayout);
 					}
-
-					D2D1_RECT_F tTextRectF = D2D1::RectF(
-						renderTargetSize.width / 2 - tTextMetrics.width / 2
-						, renderTargetSize.height / 2 - tTextMetrics.height / 2 - 2 * tTextMetrics.height
-						, renderTargetSize.width / 2 - tTextMetrics.width / 2 + tTextMetrics.width
-						, renderTargetSize.height / 2 - tTextMetrics.height / 2 - 2 * tTextMetrics.height + tTextMetrics.height
-					);
-
-					hr = m_pTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
-					m_pRenderTarget->DrawText(lpszText, lstrlen(lpszText), m_pTextFormat, tTextRectF, m_pBlackBrush);
 				}
-
-				{// カタカナを表示
-					LPCWSTR lpszText = g.list[g.nQuestionCount].kana.c_str();
+				else if (g.nGameState == GAME_STATE::GS_TITLE)
+				{
+					LPCWSTR lpszText = L"タイトル画面\r\nスペースキーで開始";
 					DWRITE_TEXT_METRICS tTextMetrics;
 					{
 						IDWriteTextLayout* pTextLayout = NULL;
@@ -1286,57 +1506,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 							, &pTextLayout
 						);
 						pTextLayout->GetMetrics(&tTextMetrics);
+
+						m_pRenderTarget->DrawTextLayout(D2D1::Point2F(renderTargetSize.width / 2 - tTextMetrics.width / 2
+							, renderTargetSize.height / 2 - tTextMetrics.height / 2),
+							pTextLayout,
+							m_pBlackBrush,
+							D2D1_DRAW_TEXT_OPTIONS_NO_SNAP);
+
 						SafeRelease(&pTextLayout);
 					}
-
-					D2D1_RECT_F tTextRectF = D2D1::RectF(
-						renderTargetSize.width / 2 - tTextMetrics.width / 2
-						, renderTargetSize.height / 2 - tTextMetrics.height / 2
-						, renderTargetSize.width / 2 - tTextMetrics.width / 2 + tTextMetrics.width
-						, renderTargetSize.height / 2 - tTextMetrics.height / 2 + tTextMetrics.height
-					);
-
-					hr = m_pTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
-					m_pRenderTarget->DrawText(lpszText, g.nCursor, m_pTextFormat, tTextRectF, m_pGrayBrush);
-
-					hr = m_pTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_TRAILING);
-					m_pRenderTarget->DrawText(lpszText + g.nCursor, lstrlen(lpszText + g.nCursor), m_pTextFormat, tTextRectF, m_pBlackBrush);
-
 				}
-
-				{// ローマ字を表示
-					DWRITE_TEXT_METRICS tTextMetrics;
-					{
-						IDWriteTextLayout* pTextLayout = NULL;
-						hr = m_pDWriteFactory->CreateTextLayout(
-							g.szQuestionRome
-							, lstrlenW(g.szQuestionRome)
-							, m_pTextFormat
-							, renderTargetSize.width
-							, renderTargetSize.height
-							, &pTextLayout
-						);
-						pTextLayout->GetMetrics(&tTextMetrics);
-						SafeRelease(&pTextLayout);
-					}
-
-					D2D1_RECT_F tTextRectF = D2D1::RectF(
-						renderTargetSize.width / 2 - tTextMetrics.width / 2
-						, renderTargetSize.height / 2 - tTextMetrics.height / 2 + tTextMetrics.height
-						, renderTargetSize.width / 2 - tTextMetrics.width / 2 + tTextMetrics.width
-						, renderTargetSize.height / 2 - tTextMetrics.height / 2 + tTextMetrics.height + tTextMetrics.height
-					);
-
-					hr = m_pTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
-					m_pRenderTarget->DrawText(g.szQuestionRome, lstrlen(g.szQuestionRome), m_pTextFormat, tTextRectF, m_pBlackBrush);
-				}
-
-
 
 				hr = m_pRenderTarget->EndDraw();
 				if (hr == D2DERR_RECREATE_TARGET)
 				{
-					hr = S_OK;
 					SafeRelease(&m_pRenderTarget);
 					SafeRelease(&m_pBlackBrush);
 					SafeRelease(&m_pGrayBrush);
@@ -1351,7 +1534,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			if (IsKigo(wParam))
 			{
 				BOOL bRedraw = FALSE;
-				if (g.szQuestionKana[g.nCursor] == L'ン' && lstrlen(g.szInputRome) == 1 && g.szInputRome[0] == L'N')
+
+				if (g.szQuestionKana[g.nCursor] == L'ン' && g.szQuestionKana[g.nCursor] != L'\0' && 
+					g.szInputRome[0] == L'N' && g.szInputRome[1] == L'\0')
 				{
 					g.nCursor++;
 					g.nTypeCount++;
@@ -1391,7 +1576,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 				BOOL bRedraw = FALSE;
 
-				if (g.szQuestionKana[g.nCursor] == L'ン' && lstrlen(g.szInputRome) == 2 && g.szInputRome[0] == L'N' && g.szInputRome[1] != L'Y')
+				if (g.szQuestionKana[g.nCursor] == L'ン' && g.szQuestionKana[g.nCursor] != L'\0' &&
+					lstrlen(g.szInputRome) == 2 && g.szInputRome[0] == L'N' && g.szInputRome[1] != L'N' && g.szInputRome[1] != L'Y' && IsBoin(g.szInputRome[1]) == FALSE)
 				{
 					// ンは2文字目に関係なく確定
 					g.nCursor++;
@@ -1470,6 +1656,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		SafeRelease(&m_pTextFormat);
 		SafeRelease(&m_pBlackBrush);
 		SafeRelease(&m_pGrayBrush);
+		SafeRelease(&m_pBitmap);
+		SafeRelease(&m_pWICFactory);
 		DeleteObject(hFont);
 		CoUninitialize();
 		PostQuitMessage(0);
@@ -1503,7 +1691,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPreInst, LPWSTR pCmdLine, in
 	HWND hWnd = CreateWindow(
 		szWindowClass,
 		szTitle,
-		WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
+		WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT,
 		0,
 		CW_USEDEFAULT,
