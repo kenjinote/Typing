@@ -21,6 +21,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <algorithm>
 #include "resource.h"
 
 #define MAX_SOUND_COUNT 2
@@ -56,7 +57,7 @@ struct kana
 };
 
 std::map<std::wstring, kana> g_rome{
-	{L"A",{L"ア",0.0}},
+	{L"A",{L"ア",1.0}},
 	{L"BA",{L"バ",0.0}},
 	{L"BBA",{L"ッバ",0.0}},
 	{L"BBE",{L"ッベ",0.0}},
@@ -87,6 +88,11 @@ std::map<std::wstring, kana> g_rome{
 	{L"CI",{L"シ",0.0}},
 	{L"CO",{L"コ",0.0}},
 	{L"CU",{L"ク",0.0}},
+	{L"CYA",{L"チャ",0.0}},
+	{L"CYE",{L"チェ",0.0}},
+	{L"CYI",{L"チィ",0.0}},
+	{L"CYO",{L"チョ",0.0}},
+	{L"CYU",{L"チュ",0.0}},
 	{L"DA",{L"ダ",0.0}},
 	{L"DDA",{L"ッダ",0.0}},
 	{L"DDE",{L"ッデ",0.0}},
@@ -102,7 +108,7 @@ std::map<std::wstring, kana> g_rome{
 	{L"DI",{L"ディ",0.0}},
 	{L"DJI",{L"ヂ",0.0}},
 	{L"DO",{L"ド",0.0}},
-	{L"DU",{L"ヅ",0.0}},
+	{L"DU",{L"ヅ",1.0}},
 	{L"DWA",{L"ドァ",0.0}},
 	{L"DWE",{L"ドェ",0.0}},
 	{L"DWI",{L"ドィ",0.0}},
@@ -114,7 +120,7 @@ std::map<std::wstring, kana> g_rome{
 	{L"DYO",{L"ヂョ",0.0}},
 	{L"DYU",{L"ヂュ",0.0}},
 	{L"DZU",{L"ヅ",0.0}},
-	{L"E",{L"エ",0.0}},
+	{L"E",{L"エ",1.0}},
 	{L"FA",{L"ファ",0.0}},
 	{L"FE",{L"フェ",0.0}},
 	{L"FFA",{L"ッファ",0.0}},
@@ -155,24 +161,25 @@ std::map<std::wstring, kana> g_rome{
 	{L"GYI",{L"ギィ",0.0}},
 	{L"GYO",{L"ギョ",0.0}},
 	{L"GYU",{L"ギュ",0.0}},
-	{L"HA",{L"ハ",0.0}},
-	{L"HE",{L"ヘ",0.0}},
+	{L"HA",{L"ハ",1.0}},
+	{L"HE",{L"ヘ",1.0}},
 	{L"HHA",{L"ッハ",0.0}},
 	{L"HHE",{L"ッヘ",0.0}},
 	{L"HHI",{L"ッヒ",0.0}},
 	{L"HHO",{L"ッポ",0.0}},
 	{L"HHU",{L"ッフ",0.0}},
-	{L"HI",{L"ヒ",0.0}},
-	{L"HO",{L"ホ",0.0}},
-	{L"HU",{L"フ",0.0}},
+	{L"HI",{L"ヒ",1.0}},
+	{L"HO",{L"ホ",1.0}},
+	{L"HU",{L"フ",1.0}},
 	{L"HYA",{L"ヒャ",0.0}},
+	{L"HYE",{L"ヒェ",0.0}},
+	{L"HYI",{L"ヒィ",0.0}},
 	{L"HYO",{L"ヒョ",0.0}},
 	{L"HYU",{L"ヒュ",0.0}},
-	{L"I",{L"イ",0.0}},
-	{L"JA",{L"ジャ",0.0}},
-	{L"JE",{L"ジェ",0.0}},
-	{L"JI",{L"ジ",0.0}},
-	{L"JI",{L"ヂ",0.0}},
+	{L"I",{L"イ",1.0}},
+	{L"JA",{L"ジャ",1.0}},
+	{L"JE",{L"ジェ",1.0}},
+	{L"JI",{L"ジ",1.0}},
 	{L"JJA",{L"ッジャ",0.0}},
 	{L"JJE",{L"ッジェ",0.0}},
 	{L"JJI",{L"ッジ",0.0}},
@@ -183,37 +190,43 @@ std::map<std::wstring, kana> g_rome{
 	{L"JJYI",{L"ッジィ",0.0}},
 	{L"JJYO",{L"ッジョ",0.0}},
 	{L"JJYU",{L"ッジュ",0.0}},
-	{L"JO",{L"ジョ",0.0}},
-	{L"JU",{L"ジュ",0.0}},
+	{L"JO",{L"ジョ",1.0}},
+	{L"JU",{L"ジュ",1.0}},
 	{L"JYA",{L"ジャ",0.0}},
 	{L"JYE",{L"ジェ",0.0}},
 	{L"JYI",{L"ジィ",0.0}},
 	{L"JYO",{L"ジョ",0.0}},
 	{L"JYU",{L"ジュ",0.0}},
-	{L"KA",{L"カ",0.0}},
-	{L"KE",{L"ケ",0.0}},
-	{L"KI",{L"キ",0.0}},
+	{L"KA",{L"カ",1.0}},
+	{L"KE",{L"ケ",1.0}},
+	{L"KI",{L"キ",1.0}},
 	{L"KKA",{L"ッカ",0.0}},
 	{L"KKE",{L"ッケ",0.0}},
 	{L"KKI",{L"ッキ",0.0}},
 	{L"KKO",{L"ッコ",0.0}},
 	{L"KKU",{L"ック",0.0}},
-	{L"KO",{L"コ",0.0}},
-	{L"KU",{L"ク",0.0}},
-	{L"KYA",{L"キャ",0.0}},
-	{L"KYO",{L"キョ",0.0}},
-	{L"KYU",{L"キュ",0.0}},
+	{L"KO",{L"コ",1.0}},
+	{L"KU",{L"ク",1.0}},
+	{L"KYA",{L"キャ",1.0}},
+	{L"KYE",{L"キェ",1.0}},
+	{L"KYI",{L"キィ",1.0}},
+	{L"KYO",{L"キョ",1.0}},
+	{L"KYU",{L"キュ",1.0}},
 	{L"LA",{L"ァ",0.0}},
 	{L"LE",{L"ェ",0.0}},
 	{L"LI",{L"ィ",0.0}},
+	{L"LKA",{L"ヵ",0.0}},
+	{L"LKE",{L"ヶ",0.0}},
 	{L"LLA",{L"ッァ",0.0}},
 	{L"LLE",{L"ッェ",0.0}},
 	{L"LLI",{L"ッィ",0.0}},
 	{L"LLO",{L"ッォ",0.0}},
 	{L"LLU",{L"ッゥ",0.0}},
 	{L"LO",{L"ォ",0.0}},
+	{L"LTSU",{L"ッ",0.0}},
 	{L"LTU",{L"ッ",0.0}},
 	{L"LU",{L"ゥ",0.0}},
+	{L"LWA",{L"ヮ",0.0}},
 	{L"LYA",{L"ャ",0.0}},
 	{L"LYE",{L"ェ",0.0}},
 	{L"LYI",{L"ィ",0.0}},
@@ -230,18 +243,22 @@ std::map<std::wstring, kana> g_rome{
 	{L"MO",{L"モ",0.0}},
 	{L"MU",{L"ム",0.0}},
 	{L"MYA",{L"ミャ",0.0}},
+	{L"MYE",{L"ミェ",0.0}},
+	{L"MYI",{L"ミィ",0.0}},
 	{L"MYO",{L"ミョ",0.0}},
 	{L"MYU",{L"ミュ",0.0}},
-	{L"NA",{L"ナ",0.0}},
-	{L"NE",{L"ネ",0.0}},
-	{L"NI",{L"ニ",0.0}},
-	{L"NN",{L"ン",0.0}},
-	{L"NO",{L"ノ",0.0}},
-	{L"NU",{L"ヌ",0.0}},
+	{L"NA",{L"ナ",1.0}},
+	{L"NE",{L"ネ",1.0}},
+	{L"NI",{L"ニ",1.0}},
+	{L"NN",{L"ン",1.0}},
+	{L"NO",{L"ノ",1.0}},
+	{L"NU",{L"ヌ",1.0}},
 	{L"NYA",{L"ニャ",0.0}},
+	{L"NYE",{L"ニェ",0.0}},
+	{L"NYI",{L"ニィ",0.0}},
 	{L"NYO",{L"ニョ",0.0}},
 	{L"NYU",{L"ニュ",0.0}},
-	{L"O",{L"オ",0.0}},
+	{L"O",{L"オ",1.0}},
 	{L"PA",{L"パ",0.0}},
 	{L"PE",{L"ペ",0.0}},
 	{L"PI",{L"ピ",0.0}},
@@ -251,6 +268,11 @@ std::map<std::wstring, kana> g_rome{
 	{L"PPI",{L"ッピ",0.0}},
 	{L"PPO",{L"ッポ",0.0}},
 	{L"PPU",{L"ップ",0.0}},
+	{L"PPYA",{L"ッピャ",0.0}},
+	{L"PPYE",{L"ッピェ",0.0}},
+	{L"PPYI",{L"ッピィ",0.0}},
+	{L"PPYO",{L"ッピョ",0.0}},
+	{L"PPYU",{L"ッピュ",0.0}},
 	{L"PU",{L"プ",0.0}},
 	{L"PYA",{L"ピャ",0.0}},
 	{L"PYE",{L"ピェ",0.0}},
@@ -295,40 +317,40 @@ std::map<std::wstring, kana> g_rome{
 	{L"RYA",{L"リャ",0.0}},
 	{L"RYO",{L"リョ",0.0}},
 	{L"RYU",{L"リュ",0.0}},
-	{L"SA",{L"サ",0.0}},
-	{L"SE",{L"セ",0.0}},
+	{L"SA",{L"サ",1.0}},
+	{L"SE",{L"セ",1.0}},
 	{L"SHA",{L"シャ",0.0}},
 	{L"SHE",{L"シェ",0.0}},
 	{L"SHI",{L"シ",0.0}},
 	{L"SHO",{L"ショ",0.0}},
 	{L"SHU",{L"シュ",0.0}},
-	{L"SI",{L"シ",0.0}},
-	{L"SO",{L"ソ",0.0}},
+	{L"SI",{L"シ",1.0}},
+	{L"SO",{L"ソ",1.0}},
 	{L"SSA",{L"ッサ",0.0}},
 	{L"SSE",{L"ッセ",0.0}},
 	{L"SSI",{L"ッシ",0.0}},
 	{L"SSO",{L"ッソ",0.0}},
 	{L"SSU",{L"ッス",0.0}},
-	{L"SU",{L"ス",0.0}},
+	{L"SU",{L"ス",1.0}},
 	{L"SWA",{L"スァ",0.0}},
 	{L"SWE",{L"スェ",0.0}},
 	{L"SWI",{L"スィ",0.0}},
 	{L"SWO",{L"スォ",0.0}},
 	{L"SWU",{L"スゥ",0.0}},
-	{L"SYA",{L"シャ",0.0}},
-	{L"SYE",{L"シェ",0.0}},
-	{L"SYI",{L"シィ",0.0}},
-	{L"SYO",{L"ショ",0.0}},
-	{L"SYU",{L"シュ",0.0}},
-	{L"TA",{L"タ",0.0}},
-	{L"TE",{L"テ",0.0}},
+	{L"SYA",{L"シャ",1.0}},
+	{L"SYE",{L"シェ",1.0}},
+	{L"SYI",{L"シィ",1.0}},
+	{L"SYO",{L"ショ",1.0}},
+	{L"SYU",{L"シュ",1.0}},
+	{L"TA",{L"タ",1.0}},
+	{L"TE",{L"テ",1.0}},
 	{L"THA",{L"テャ",0.0}},
 	{L"THE",{L"テェ",0.0}},
 	{L"THI",{L"ティ",0.0}},
 	{L"THO",{L"テョ",0.0}},
 	{L"THU",{L"テュ",0.0}},
-	{L"TI",{L"チ",0.0}},
-	{L"TO",{L"ト",0.0}},
+	{L"TI",{L"チ",1.0}},
+	{L"TO",{L"ト",1.0}},
 	{L"TSA",{L"ツァ",0.0}},
 	{L"TSE",{L"ツェ",0.0}},
 	{L"TSI",{L"ツィ",0.0}},
@@ -339,19 +361,28 @@ std::map<std::wstring, kana> g_rome{
 	{L"TTI",{L"ッチ",0.0}},
 	{L"TTO",{L"ット",0.0}},
 	{L"TTU",{L"ッツ",0.0}},
-	{L"TU",{L"ツ",0.0}},
+	{L"TU",{L"ツ",1.0}},
 	{L"TWA",{L"トァ",0.0}},
 	{L"TWE",{L"トェ",0.0}},
 	{L"TWI",{L"トィ",0.0}},
 	{L"TWO",{L"トォ",0.0}},
 	{L"TWU",{L"トゥ",0.0}},
-	{L"TYA",{L"チャ",0.0}},
-	{L"TYE",{L"チェ",0.0}},
-	{L"TYI",{L"チィ",0.0}},
-	{L"TYO",{L"チョ",0.0}},
-	{L"TYU",{L"チュ",0.0}},
-	{L"U",{L"ウ",0.0}},
+	{L"TYA",{L"チャ",1.0}},
+	{L"TYE",{L"チェ",1.0}},
+	{L"TYI",{L"チィ",1.0}},
+	{L"TYO",{L"チョ",1.0}},
+	{L"TYU",{L"チュ",1.0}},
+	{L"U",{L"ウ",1.0}},
+	{L"VA",{L"ヴァ",0.0}},
+	{L"VE",{L"ヴェ",0.0}},
+	{L"VI",{L"ヴィ",0.0}},
+	{L"VO",{L"ヴォ",0.0}},
 	{L"VU",{L"ヴ",0.0}},
+	{L"VYA",{L"ヴャ",0.0}},
+	{L"VYE",{L"ヴェ",0.0}},
+	{L"VYI",{L"ヴィ",0.0}},
+	{L"VYO",{L"ヴョ",0.0}},
+	{L"VYU",{L"ヴュ",0.0}},
 	{L"WA",{L"ワ",0.0}},
 	{L"WE",{L"ウェ",0.0}},
 	{L"WHA",{L"ウァ",0.0}},
@@ -361,6 +392,7 @@ std::map<std::wstring, kana> g_rome{
 	{L"WHU",{L"ウ",0.0}},
 	{L"WI",{L"ウィ",0.0}},
 	{L"WO",{L"ヲ",0.0}},
+	{L"WU",{L"ウ",0.0}},
 	{L"WWA",{L"ッワ",0.0}},
 	{L"WWE",{L"ッウェ",0.0}},
 	{L"WWI",{L"ッウィ",0.0}},
@@ -369,10 +401,13 @@ std::map<std::wstring, kana> g_rome{
 	{L"XA",{L"ァ",0.0}},
 	{L"XE",{L"ェ",0.0}},
 	{L"XI",{L"ィ",0.0}},
+	{L"XKA",{L"ヵ",0.0}},
+	{L"XKE",{L"ヶ",0.0}},
 	{L"XN",{L"ン",0.0}},
 	{L"XO",{L"ォ",0.0}},
 	{L"XTU",{L"ッ",0.0}},
 	{L"XU",{L"ゥ",0.0}},
+	{L"XWA",{L"ヮ",0.0}},
 	{L"XXA",{L"ッァ",0.0}},
 	{L"XXE",{L"ッェ",0.0}},
 	{L"XXI",{L"ッィ",0.0}},
@@ -390,6 +425,7 @@ std::map<std::wstring, kana> g_rome{
 	{L"XYU",{L"ュ",0.0}},
 	{L"YA",{L"ヤ",0.0}},
 	{L"YE",{L"イェ",0.0}},
+	{L"YI",{L"イ",0.0}},
 	{L"YO",{L"ヨ",0.0}},
 	{L"YU",{L"ユ",0.0}},
 	{L"YYA",{L"ッヤ",0.0}},
@@ -422,6 +458,7 @@ std::map<std::wstring, std::wstring> g_kana{
 };
 
 std::map<std::wstring, std::wstring> words{
+	{L"健康的なからだをつくるには、栄養バランスのとれた食事、適度な運動、十分な睡眠が重要です。",L"ケンコウテキナカラダヲツクルニハ、エイヨウノバラスノトレタショクジ、テキドナウンドウ、ジュウブンナスイミンガジュウヨウデス。"},
 	{L"この度、弊社では過去に資料請求をしていただいた方に対し、メールマガジンでフォローをさせていただくことになりました。",L"コノタビ,ヘイシャデハカコニシリョウセイキュウヲシテイタダイタカタニタイシ,メールマガジンデフォローサセテイタダクコトニナリマシタ."},
 	{L"最新の研修動向、メールの上手な書き方、ビジネスメール実態調査の最新データなど、プロとしての切り口をお楽しみいただけたらと思います。",L"サイシンノケンシュウドウコウ,メールノジョウズナカキカタ,ビジネスメールノジッタイチョウサノサイシンデータナド,プロトシテノキリクチヲオタノシミイタダケタラトオモイマス."},
 	{L"配信は、毎週月曜日の11時頃を予定しております。",L"ハイシンハ,マイシュウゲツヨウビノジュウイチジゴロヲヨテイシテオリマス."},
@@ -432,8 +469,8 @@ std::map<std::wstring, std::wstring> words{
 	{L"お振り込みはまだのため、返金等はございません。",L"オフリコミハマダノタメ,ヘンキントウハゴザイマセン."},
 	{L"また機会がございましたら、お申し込みいただけますと幸いです。",L"マタノキカイガゴザイマシタラ,オモウシコミイタダケマストサイワイデス."},
 	{L"ご不明な点やご質問がございましたら、お気軽にご連絡ください。",L"ゴフメイナテンヤゴシツモンガゴザイマシタラ,オキガルニゴレンラククダサイ."},
-	{L"それでは、今後ともよろしくお願いいたします。",L"ソレデハ,コンゴトモよろしくオネガイイタシマス."},
-	{L"現在、為替変動などの諸事情により、原材料の価格が高騰しております。",L"ゲンザイ,カワセヘンドウナドノショジジョウニヨリ,ゲンザイジョウノカカクガコウトウシテオリマス."},
+	{L"それでは、今後ともよろしくお願いいたします。",L"ソレデハ,コンゴトモヨロシクオネガイイタシマス."},
+	{L"現在、為替変動などの諸事情により、原材料の価格が高騰しております。",L"ゲンザイ,カワセヘンドウナドノショジジョウニヨリ,ゲンザイリョウノカカクガコウトウシテオリマス."},
 	{L"これまでも弊社はスタッフ一丸となり、諸経費の削減やコストを下げる努力を行なってまいりましたが、今後、経営を圧迫しかねない状況に陥っております。",L"コレマデモヘイシャスタッフイチガントナリ,ショケイヒノサクゲンヤコストヲサゲルドリョクヲオコナッテマイリマシタガ,コンゴ,ケイヒヲアッパクシカネナイジョウキョウニオチイッテオリマス."},
 	{L"誠に遺憾ではありますが、検討を重ねた結果、来月から以下3商品の価格を改定させていただくことになりました。",L"マコトニイカンデハアリマスガ,ケントウヲカサネタケッカ,ライゲツカライカノ3ショウヒンノカカクヲカイテイサセテイタダクコトニナリマシタ."},
 	{L"なにとぞご理解のほどお願いいたします。",L"ナニトゾゴリカイノホドオネガイイタシマス."},
@@ -466,7 +503,7 @@ typedef enum {
 	GS_COUNTDOWN,
 	GS_GAMESTART,
 	GS_GAMEEND,
-	GS_GAMEOVER,
+	GS_GAMESTATUS,
 	GS_RANKINGVIW,
 	GS_NAMEINPUT,
 	GS_SETTINGS,
@@ -477,11 +514,19 @@ struct game
 	game()
 	{
 		nGameState = GS_TITLE;
+		nMaxTimeCount = 60;
+		nTimeCount = nMaxTimeCount;
+		nCursorKana = 0;
+		nCursorRome = 0;
 		nCategory = 1;
-		nTypeCount = 0;
+		nTypeCountKana = 0;
+		nTypeCountRome = 0;
+		bMiss = FALSE;
 		nMissCount = 0;
 		nQuestionCount = 0;
-		nMaxQuestionCount = 2;
+		nMaxQuestionCount = 10;
+		nCountDown = 3;
+
 		list.clear();
 	}
 
@@ -490,53 +535,65 @@ struct game
 
 	void start()
 	{
-		nCursor = 0;
-		nTypeCount = 0;
+		list.clear();
+		nCursorKana = 0;
+		nCursorRome = 0;
+		nTypeCountKana = 0;
+		nTypeCountRome = 0;
+		bMiss = FALSE;
 		nMissCount = 0;
 		nQuestionCount = 0;
-		nMaxQuestionCount = 2;
+		nMaxQuestionCount = 10;
+		nMaxTimeCount = 60;
+		nTimeCount = nMaxTimeCount;
+		szInputRome[0] = 0;
+
+//#ifdef _DEBUG
+//		sentence data;
+//		data.words = L"発表する。";
+//		data.kana = L"ハッピョウスル.";
+//		list.push_back(data);
+//#else
+//		LoadWordsFromDatabase();
+//#endif
+
 		LoadWordsFromDatabase();
 
 		lstrcpy(szQuestionKana, list[nQuestionCount].kana.c_str());
 		lstrcpy(szQuestionRome, GetRomeFromKana(szQuestionKana));
 
-		GetLocalTime(&stGameStartTime);
-
 		nGameState = GS_GAMESTART;
 	}
 	void next()
 	{
-		if (nQuestionCount + 1 < nMaxQuestionCount)
-		{
-			nQuestionCount++;
+		nQuestionCount++;
 
-			lstrcpy(szQuestionKana, list[nQuestionCount].kana.c_str());
-			lstrcpy(szQuestionRome, GetRomeFromKana(szQuestionKana));
+		lstrcpy(szQuestionKana, list[nQuestionCount % list.size()].kana.c_str());
+		lstrcpy(szQuestionRome, GetRomeFromKana(szQuestionKana));
 			
-			szInputRome[0] = 0;
-			nCursor = 0;
-		}
-		else
-		{
-			GetLocalTime(&stGameEndTime);
-
-			nGameState = GS_GAMEEND;
-		}
+		szInputRome[0] = 0;
+		nCursorKana = 0;
+		nCursorRome = 0;
+		bMiss = FALSE;
 	}
 	std::vector<sentence> list;
 	GAME_STATE nGameState;
-	int nTypeCount;
+	int nTypeCountKana;
+	int nTypeCountRome;
+	BOOL bMiss;
 	int nMissCount;
 	int nQuestionCount;
 	int nMaxQuestionCount;
-	SYSTEMTIME stGameStartTime;
-	SYSTEMTIME stGameEndTime;
-	int nCursor; // 現在の入力位置
+	int nTimeCount;
+	int nMaxTimeCount;
+	int nCursorKana; // 現在のかな入力位置
+	int nCursorRome; // 現在のローマ字入力位置
 	WCHAR szInputRome[5]; // 現在入力されたローマ字
 	int nCategory;
 	WCHAR szQuestionKana[256]; // カタカナを配列で用意しておく
 	WCHAR szQuestionRome[1024]; // ローマ字を配列で用意しておく
 	std::vector<int> kanakugiri; // どこで区切るかの情報
+	int nCountDown;
 };
 
 template<class Interface> inline void SafeRelease(Interface** ppInterfaceToRelease)
@@ -900,10 +957,6 @@ LPWSTR game::GetRomeFromKana(LPCWSTR lpszKana)
 
 BOOL game::LoadWordsFromDatabase()
 {
-	srand((unsigned)GetTickCount());
-
-	list.clear();
-
 	BOOL bRet = FALSE;
 	_ConnectionPtr pCon(NULL);
 	HRESULT hr = pCon.CreateInstance(__uuidof(Connection));
@@ -924,7 +977,7 @@ BOOL game::LoadWordsFromDatabase()
 					pCommand.CreateInstance(__uuidof(Command));
 					pCommand->ActiveConnection = pCon;
 					WCHAR szSQL[256];
-					wsprintf(szSQL, L"select top %d * from item where category = %d order by Rnd([id]);", nMaxQuestionCount, nCategory);
+					wsprintf(szSQL, L"select top %d * from item where category = %d order by Rnd(INT(NOW*id)-NOW*id);", nMaxQuestionCount, nCategory);
 					pCommand->CommandText = szSQL;
 					pRecordset = pCommand->Execute(NULL, NULL, adCmdText);
 					if (!pRecordset->EndOfFile)
@@ -968,6 +1021,12 @@ BOOL game::LoadWordsFromDatabase()
 		}
 		pCon = NULL;
 	}
+
+	if (list.size() > 0)
+	{
+		//std::random_shuffle(list.begin(), list.end());
+	}
+
 	return bRet;
 }
 
@@ -1015,21 +1074,49 @@ BOOL GetScaling(HWND hWnd, UINT* pnX, UINT* pnY)
 	return bSetScaling;
 }
 
-BOOL JudgeKigou(DWORD dwKeyCode, LPCWSTR lpszKana, int nCursor)
+BOOL JudgeFromKigou(DWORD dwKeyCode, LPCWSTR lpszKana, int nCursorKana)
 {
-	switch (lpszKana[nCursor])
+	switch (lpszKana[nCursorKana])
 	{
 	case L'0':
+	case L'０':
+		if (dwKeyCode == L'0') return TRUE;
+		break;
 	case L'1':
+	case L'１':
+		if (dwKeyCode == L'1') return TRUE;
+		break;
 	case L'2':
+	case L'２':
+		if (dwKeyCode == L'2') return TRUE;
+		break;
 	case L'3':
+	case L'３':
+		if (dwKeyCode == L'3') return TRUE;
+		break;
 	case L'4':
+	case L'４':
+		if (dwKeyCode == L'4') return TRUE;
+		break;
 	case L'5':
+	case L'５':
+		if (dwKeyCode == L'5') return TRUE;
+		break;
 	case L'6':
+	case L'６':
+		if (dwKeyCode == L'6') return TRUE;
+		break;
 	case L'7':
+	case L'７':
+		if (dwKeyCode == L'7') return TRUE;
+		break;
 	case L'8':
+	case L'８':
+		if (dwKeyCode == L'8') return TRUE;
+		break;
 	case L'9':
-		if (dwKeyCode == lpszKana[nCursor]) return TRUE;
+	case L'９':
+		if (dwKeyCode == L'9') return TRUE;
 		break;
 	case L'。':
 	case L'．':
@@ -1045,31 +1132,38 @@ BOOL JudgeKigou(DWORD dwKeyCode, LPCWSTR lpszKana, int nCursor)
 		if (dwKeyCode == VK_OEM_MINUS) return TRUE;
 		break;
 	case L'+':
+	case L'＋':
 		if (dwKeyCode == VK_OEM_PLUS) return TRUE;
 		break;
 	case L'?':
+	case L'？':
 		if (dwKeyCode == VK_OEM_2) return TRUE;
 		break;
 	case L'/':
+	case L'／':
 		if (dwKeyCode == VK_OEM_2) return TRUE;
 		break;
 	case L':':
+	case L'：':
 		if (dwKeyCode == VK_OEM_1) return TRUE;
 		break;
 	case L';':
+	case L'；':
 		if (dwKeyCode == VK_OEM_1) return TRUE;
 		break;
 	case L'`':
+	case L'‘':
 		if (dwKeyCode == VK_OEM_3) return TRUE;
 		break;
 	case L'~':
+	case L'～':
 		if (dwKeyCode == VK_OEM_3) return TRUE;
 		break;		
 	}
 	return FALSE;
 }
 
-BOOL JudgeKana(LPCWSTR lpszInputAlphabet, LPCWSTR lpszKana, int nCursor, LPWSTR lpszOutputKana)
+BOOL JudgeFromKana(IN LPCWSTR lpszInputAlphabet, IN LPCWSTR lpszKana, IN int nCursorKana, OUT LPWSTR lpszOutputKana, OUT LPWSTR lpszOutputRome)
 {
 	std::map<std::wstring, kana>::const_iterator i = g_rome.lower_bound(lpszInputAlphabet);
 	while (i != g_rome.end())
@@ -1081,9 +1175,10 @@ BOOL JudgeKana(LPCWSTR lpszInputAlphabet, LPCWSTR lpszKana, int nCursor, LPWSTR 
 		}
 
 		const std::wstring& kana = i->second.kana1;
-		if (StrCmpN(lpszKana + nCursor, kana.c_str(), kana.length()) == 0)
+		if (StrCmpN(lpszKana + nCursorKana, kana.c_str(), kana.length()) == 0)
 		{
 			lstrcpy(lpszOutputKana, kana.c_str());
+			lstrcpy(lpszOutputRome, i->first.c_str());
 			return TRUE;
 		}
 
@@ -1308,6 +1403,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	static IDWriteTextFormat* m_pTextFormat;
 	static ID2D1SolidColorBrush* m_pBlackBrush;
 	static ID2D1SolidColorBrush* m_pGrayBrush;
+	static ID2D1SolidColorBrush* m_pRedBrush;
 	static ID2D1Bitmap* m_pBitmap;
 
 	static HFONT hFont;
@@ -1324,7 +1420,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			CreateKeysDatabaseFile(hWnd);
 
 			CreateWordsDatabaseFile(hWnd);
-			static const WCHAR msc_fontName[] = L"Verdana";
+			static const WCHAR msc_fontName[] = L"ＭＳ ゴシック";
 			static const FLOAT msc_fontSize = 50;
 			HRESULT hr = D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &m_pD2DFactory);
 			if (SUCCEEDED(hr))
@@ -1341,8 +1437,48 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		// ゲーム開始
 		// ランダムで問題を読み込む
 
-		//g.start();
+		g.nGameState = GS_TITLE;
 
+//		g.start();
+//		SetTimer(hWnd, 1000, 1000, 0);
+
+		break;
+	case WM_TIMER:
+		debuglog(L"WM_TIMER %d", wParam);
+		if (wParam == 1000) // ゲーム中のタイマ
+		{
+			if (g.nTimeCount <= 1)
+			{
+				KillTimer(hWnd, 1000);
+				g.nGameState = GS_GAMEEND;
+				SetTimer(hWnd, 1001, 2000, NULL);
+			}
+			else
+			{
+				g.nTimeCount--;
+			}
+			InvalidateRect(hWnd, 0, 0);
+		}
+		else if (wParam == 1001) // GameEndから来たとき
+		{
+			KillTimer(hWnd, 1001);
+			g.nGameState = GS_GAMESTATUS;
+			InvalidateRect(hWnd, 0, 0);
+		}
+		else if (wParam == 1002)
+		{
+			if (g.nCountDown <= 1)
+			{
+				KillTimer(hWnd, 1002);
+				g.start();
+				SetTimer(hWnd, 1000, 1000, NULL);
+			}
+			else
+			{
+				g.nCountDown--;
+			}
+			InvalidateRect(hWnd, 0, 0);
+		}
 		break;
 	case WM_SIZE:
 		if (m_pRenderTarget)
@@ -1371,6 +1507,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				if (SUCCEEDED(hr))
 					hr = m_pRenderTarget->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::LightGray), &m_pGrayBrush);
 				if (SUCCEEDED(hr))
+					hr = m_pRenderTarget->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Red), &m_pRedBrush);
+				if (SUCCEEDED(hr))
 					hr = LoadResourceBitmap(m_pRenderTarget, m_pWICFactory, MAKEINTRESOURCE(IDR_JPEG1), L"JPEG", 200, 0, &m_pBitmap);
 			}
 			if (SUCCEEDED(hr))
@@ -1380,6 +1518,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				m_pRenderTarget->SetTransform(D2D1::Matrix3x2F::Identity());
 				m_pRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::White));
 
+				if(0)
 				{
 					// ビットマップを描画
 					D2D1_SIZE_F size = m_pBitmap->GetSize();
@@ -1389,6 +1528,33 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 				if (g.nGameState == GAME_STATE::GS_GAMESTART)
 				{
+					{
+						// スコアを表示
+						WCHAR szText[1024];
+						wsprintf(szText, L"%d打鍵\r\n%dミス\r\n%d時間", g.nTypeCountRome, g.nMissCount, g.nTimeCount);
+						DWRITE_TEXT_METRICS tTextMetrics;
+						{
+							IDWriteTextLayout* pTextLayout = NULL;
+							hr = m_pDWriteFactory->CreateTextLayout(
+								szText
+								, lstrlenW(szText)
+								, m_pTextFormat
+								, renderTargetSize.width
+								, renderTargetSize.height
+								, &pTextLayout
+							);
+							pTextLayout->GetMetrics(&tTextMetrics);
+
+							m_pRenderTarget->DrawTextLayout(D2D1::Point2F(0.0F, 0.0F),
+								pTextLayout,
+								m_pBlackBrush,
+								D2D1_DRAW_TEXT_OPTIONS_NO_SNAP);
+
+							SafeRelease(&pTextLayout);
+						}
+
+					}
+
 					{// 問題文を表示
 						LPCWSTR lpszText = g.list[g.nQuestionCount].words.c_str();
 						DWRITE_TEXT_METRICS tTextMetrics;
@@ -1429,7 +1595,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 							);
 							pTextLayout->GetMetrics(&tTextMetrics);
 
-							DWRITE_TEXT_RANGE textRange = { 0, (UINT32)g.nCursor };
+							DWRITE_TEXT_RANGE textRange = { 0, (UINT32)g.nCursorKana };
 							pTextLayout->SetDrawingEffect(m_pGrayBrush, textRange);
 
 							m_pRenderTarget->DrawTextLayout(D2D1::Point2F(renderTargetSize.width / 2 - tTextMetrics.width / 2
@@ -1455,7 +1621,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 								, &pTextLayout
 							);
 							pTextLayout->GetMetrics(&tTextMetrics);
-
+							DWRITE_TEXT_RANGE textRange = { 0, (UINT32)g.nCursorRome };
+							pTextLayout->SetDrawingEffect(m_pGrayBrush, textRange);
+							if (g.bMiss)
+							{
+								DWRITE_TEXT_RANGE textRange = { (UINT32)g.nCursorRome, 1 };
+								pTextLayout->SetDrawingEffect(m_pRedBrush, textRange);
+							}
 							m_pRenderTarget->DrawTextLayout(D2D1::Point2F(renderTargetSize.width / 2 - tTextMetrics.width / 2
 								, renderTargetSize.height / 2 - tTextMetrics.height / 2 + tTextMetrics.height),
 								pTextLayout,
@@ -1468,7 +1640,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				}
 				else if (g.nGameState == GAME_STATE::GS_GAMEEND)
 				{
-					LPCWSTR lpszText = L"Game Over";
+					LPCWSTR lpszText = L"終了";
 					DWRITE_TEXT_METRICS tTextMetrics;
 					{
 						IDWriteTextLayout* pTextLayout = NULL;
@@ -1491,15 +1663,68 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 						SafeRelease(&pTextLayout);
 					}
 				}
+				else if (g.nGameState == GAME_STATE::GS_GAMESTATUS)
+				{
+					// スコアを表示
+					WCHAR szText[1024];
+					swprintf_s(szText, L"結果\r\n\r\n平均キータイプ数：%.2f(回/秒)\r\n打鍵数：%d回\r\nミスタイプ数：%d回\r\n\r\n\r\nスペースキーでタイトルへ", g.nTypeCountRome / 60.0, g.nTypeCountRome, g.nMissCount);
+					DWRITE_TEXT_METRICS tTextMetrics;
+					{
+						IDWriteTextLayout* pTextLayout = NULL;
+						hr = m_pDWriteFactory->CreateTextLayout(
+							szText
+							, lstrlenW(szText)
+							, m_pTextFormat
+							, renderTargetSize.width
+							, renderTargetSize.height
+							, &pTextLayout
+						);
+						pTextLayout->GetMetrics(&tTextMetrics);
+
+						m_pRenderTarget->DrawTextLayout(D2D1::Point2F(renderTargetSize.width / 2 - tTextMetrics.width / 2
+							, renderTargetSize.height / 2 - tTextMetrics.height / 2),
+							pTextLayout,
+							m_pBlackBrush,
+							D2D1_DRAW_TEXT_OPTIONS_NO_SNAP);
+
+						SafeRelease(&pTextLayout);
+					}
+				}
 				else if (g.nGameState == GAME_STATE::GS_TITLE)
 				{
-					LPCWSTR lpszText = L"タイトル画面\r\nスペースキーで開始";
+					LPCWSTR lpszText = L"タイトル画面\r\n\r\nスペースキーで開始";
 					DWRITE_TEXT_METRICS tTextMetrics;
 					{
 						IDWriteTextLayout* pTextLayout = NULL;
 						hr = m_pDWriteFactory->CreateTextLayout(
 							lpszText
 							, lstrlenW(lpszText)
+							, m_pTextFormat
+							, renderTargetSize.width
+							, renderTargetSize.height
+							, &pTextLayout
+						);
+						pTextLayout->GetMetrics(&tTextMetrics);
+
+						m_pRenderTarget->DrawTextLayout(D2D1::Point2F(renderTargetSize.width / 2 - tTextMetrics.width / 2
+							, renderTargetSize.height / 2 - tTextMetrics.height / 2),
+							pTextLayout,
+							m_pBlackBrush,
+							D2D1_DRAW_TEXT_OPTIONS_NO_SNAP);
+
+						SafeRelease(&pTextLayout);
+					}
+				}
+				else if (g.nGameState == GAME_STATE::GS_COUNTDOWN)
+				{
+					WCHAR szText[256];
+					wsprintf(szText, L"%d", g.nCountDown);
+					DWRITE_TEXT_METRICS tTextMetrics;
+					{
+						IDWriteTextLayout* pTextLayout = NULL;
+						hr = m_pDWriteFactory->CreateTextLayout(
+							szText
+							, lstrlenW(szText)
 							, m_pTextFormat
 							, renderTargetSize.width
 							, renderTargetSize.height
@@ -1523,6 +1748,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					SafeRelease(&m_pRenderTarget);
 					SafeRelease(&m_pBlackBrush);
 					SafeRelease(&m_pGrayBrush);
+					SafeRelease(&m_pRedBrush);
 				}
 			}
 		}
@@ -1533,39 +1759,37 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		{
 			if (IsKigo(wParam))
 			{
-				BOOL bRedraw = FALSE;
+				g.nTypeCountRome++;
 
-				if (g.szQuestionKana[g.nCursor] == L'ン' && g.szQuestionKana[g.nCursor] != L'\0' && 
+				if (g.szQuestionKana[g.nCursorKana] == L'ン' && g.szQuestionKana[g.nCursorKana] != L'\0' &&
 					g.szInputRome[0] == L'N' && g.szInputRome[1] == L'\0')
 				{
-					g.nCursor++;
-					g.nTypeCount++;
-					PlaySound(0);
+					g.nCursorKana++;
+					g.nCursorRome++;
+					g.nTypeCountKana++;
 					g.szInputRome[0] = g.szInputRome[1];
 					g.szInputRome[1] = 0;
-					bRedraw = TRUE;
 				}
-				if (JudgeKigou(wParam, g.szQuestionKana, g.nCursor))
+				if (JudgeFromKigou(wParam, g.szQuestionKana, g.nCursorKana))
 				{
-					g.nCursor++;
-					g.nTypeCount++;
+					g.bMiss = FALSE;
+					g.nCursorKana++;
+					g.nCursorRome++;
+					g.nTypeCountKana++;
 					PlaySound(0);
-					if (g.szQuestionKana[g.nCursor] == L'\0')
+					if (g.szQuestionKana[g.nCursorKana] == L'\0')
 					{
 						g.next();
 					}
-					bRedraw = TRUE;
 				}
 				else
 				{
+					g.bMiss = TRUE;
 					g.nMissCount++;
 					PlaySound(1);
-					g.szInputRome[0] = 0;
+					g.szInputRome[lstrlen(g.szInputRome) - 1] = 0;
 				}
-				if (bRedraw)
-				{
-					InvalidateRect(hWnd, 0, 0);
-				}
+				InvalidateRect(hWnd, 0, 0);
 			}
 			else if (L'A' <= wParam && wParam <= L'Z')
 			{
@@ -1574,51 +1798,91 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				lstrcat(g.szInputRome, szInput);
 				debuglog(L"szInputRome = %s\r\n", g.szInputRome);
 
-				BOOL bRedraw = FALSE;
+				g.nTypeCountRome++;
 
-				if (g.szQuestionKana[g.nCursor] == L'ン' && g.szQuestionKana[g.nCursor] != L'\0' &&
+				if (g.szQuestionKana[g.nCursorKana] == L'ン' && g.szQuestionKana[g.nCursorKana] != L'\0' &&
 					lstrlen(g.szInputRome) == 2 && g.szInputRome[0] == L'N' && g.szInputRome[1] != L'N' && g.szInputRome[1] != L'Y' && IsBoin(g.szInputRome[1]) == FALSE)
 				{
 					// ンは2文字目に関係なく確定
-					g.nCursor++;
-					g.nTypeCount++;
-					PlaySound(0);
+					g.nCursorKana++;
+					g.nCursorRome++;
+					g.nTypeCountKana++;
 					g.szInputRome[0] = g.szInputRome[1];
 					g.szInputRome[1] = 0;
 					debuglog(L"szInputRome(after) = %s\r\n", g.szInputRome);
-					bRedraw = TRUE;
 				}
 
-				WCHAR szOutput[4] = {};
-				BOOL bRet = JudgeKana(g.szInputRome, g.szQuestionKana, g.nCursor, szOutput);
+				WCHAR szOutputKana[4] = {};
+				WCHAR szOutputRome[5] = {};
+				BOOL bRet = JudgeFromKana(g.szInputRome, g.szQuestionKana, g.nCursorKana, szOutputKana, szOutputRome);
 				if (bRet)
 				{
-					debuglog(L"szOutput = %s\r\n", szOutput);
+					g.bMiss = FALSE;
+
+					if (g.szQuestionRome[g.nCursorRome] != szInput[0])
+					{
+						lstrcpy(&(g.szQuestionRome[g.nCursorRome - lstrlen(g.szInputRome) + 1]), szOutputRome);
+						lstrcat(g.szQuestionRome, g.GetRomeFromKana(&(g.szQuestionKana[g.nCursorKana + lstrlen(szOutputKana)])));
+					}
+
+					g.nCursorRome++;
+					PlaySound(0);
+
+					debuglog(L"szOutput = %s\r\n", szOutputKana);
 					if (L'A' == wParam || L'I' == wParam || L'U' == wParam || L'E' == wParam || L'O' == wParam || (g.szInputRome[0] == L'N' && g.szInputRome[1] == L'N'))
 					{
 						// 母音またはNを2回入力した場合は、ローマ字入力を確定させ次の文字に移る。
-						g.nCursor += lstrlen(szOutput);
-						g.nTypeCount += lstrlen(szOutput);
-						PlaySound(0);
+						g.nCursorKana += lstrlen(szOutputKana);
+						g.nTypeCountKana += lstrlen(szOutputKana);
 
 						g.szInputRome[0] = 0;
-						if (g.szQuestionKana[g.nCursor] == L'\0')
+						if (g.szQuestionKana[g.nCursorKana] == L'\0')
 						{
 							g.next();
 						}
-						bRedraw = TRUE;
 					}
 				}
 				else
 				{
+					g.bMiss = TRUE;
 					g.nMissCount++;
 					PlaySound(1);
-					g.szInputRome[0] = 0;
+					g.szInputRome[lstrlen(g.szInputRome) - 1] = 0;
 				}
-				if (bRedraw)
-				{
-					InvalidateRect(hWnd, 0, 0);
-				}
+				InvalidateRect(hWnd, 0, 0);
+			}
+			else if (wParam == VK_ESCAPE)
+			{
+				KillTimer(hWnd, 1000);
+				g.nGameState = GS_TITLE;
+				InvalidateRect(hWnd, 0, 0);
+			}
+		}
+		else if (g.nGameState == GS_GAMEEND)
+		{
+			if (wParam == VK_SPACE)
+			{
+				KillTimer(hWnd, 1001);
+				g.nGameState = GS_GAMESTATUS;
+				InvalidateRect(hWnd, 0, 0);
+			}
+		}
+		else if (g.nGameState == GS_GAMESTATUS)
+		{
+			if (wParam == VK_SPACE)
+			{
+				g.nGameState = GS_TITLE;
+				InvalidateRect(hWnd, 0, 0);
+			}
+		}
+		else if (g.nGameState == GAME_STATE::GS_TITLE)
+		{
+			if (wParam == VK_SPACE)
+			{
+				g.nCountDown = 3;
+				g.nGameState = GS_COUNTDOWN;
+				SetTimer(hWnd, 1002, 1000, NULL);
+				InvalidateRect(hWnd, 0, 0);
 			}
 		}
 		break;
@@ -1656,6 +1920,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		SafeRelease(&m_pTextFormat);
 		SafeRelease(&m_pBlackBrush);
 		SafeRelease(&m_pGrayBrush);
+		SafeRelease(&m_pRedBrush);
 		SafeRelease(&m_pBitmap);
 		SafeRelease(&m_pWICFactory);
 		DeleteObject(hFont);
