@@ -678,14 +678,12 @@ struct game
 
 #ifdef _DEBUG
 		sentence data;
-		data.words = L"URL発表する。";
-		data.kana = L"URLハッピョウスル.";
+		data.words = L"ABCDEFGHIJKLMNOPQRSTUVWXYZ.ABCDEFGHIJKLMNOPQRSTUVWXYZ.ABCDEFGHIJKLMNOPQRSTUVWXYZ.";
+		data.kana = L"ABCDEFGHIJKLMNOPQRSTUVWXYZ.ABCDEFGHIJKLMNOPQRSTUVWXYZ.ABCDEFGHIJKLMNOPQRSTUVWXYZ.";
 		list.push_back(data);
 #else
 		LoadWordsFromDatabase();
 #endif
-
-//		LoadWordsFromDatabase();
 
 		lstrcpy(szQuestionKana, list[nQuestionCount].kana.c_str());
 		lstrcpy(szQuestionRome, GetRomeFromKana(szQuestionKana));
@@ -934,6 +932,15 @@ void CreateKeysDatabaseFile(HWND hWnd)
 	}
 }
 
+BOOL IsAlphabet(WCHAR c)
+{
+	if ('A' <= c && c <= 'Z' ||
+		'a' <= c && c <= 'z')
+	{
+		return TRUE;
+	}
+	return FALSE;
+}
 
 LPWSTR game::GetRomeFromKana(LPCWSTR lpszKana)
 {
@@ -942,18 +949,19 @@ LPWSTR game::GetRomeFromKana(LPCWSTR lpszKana)
 	szRome[0] = 0;
 	while (*p != L'\0')
 	{
+		if (IsAlphabet(*p))
+		{
+			WCHAR c[2] = { towupper(*p) };
+			lstrcat(szRome, c);
+			p++;
+			continue;
+		}
+
 		switch (*p)
 		{
-		case L'U':
-			lstrcat(szRome, L"U");
-			p++;
-			continue;
-		case L'R':
-			lstrcat(szRome, L"R");
-			p++;
-			continue;
-		case L'L':
-			lstrcat(szRome, L"L");
+		case L'　':
+		case L' ':
+			lstrcat(szRome, L" ");
 			p++;
 			continue;
 		case L'０':
@@ -1402,16 +1410,6 @@ BOOL IsBoin(WCHAR c)
 	case L'U':
 	case L'E':
 	case L'O':
-		return TRUE;
-	}
-	return FALSE;
-}
-
-BOOL IsAlphabet(WCHAR c)
-{
-	if ('A' <= c && c <= 'Z' ||
-		'a' <= c && c <= 'z' )
-	{
 		return TRUE;
 	}
 	return FALSE;
