@@ -102,7 +102,7 @@
 		<col def="S0">ISDotNetInstallerArgsCommit</col>
 		<col def="S0">ISDotNetInstallerArgsUninstall</col>
 		<col def="S0">ISDotNetInstallerArgsRollback</col>
-		<row><td>Database</td><td>{4DAAF40A-F79F-4D9E-BE64-670A24ED105E}</td><td>LocalAppDataFolder</td><td>0</td><td/><td/><td>51729</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>CommonDatabase</td><td>{4DAAF40A-F79F-4D9E-BE64-670A24ED105E}</td><td>CommonAppDataFolder</td><td>0</td><td/><td/><td>51729</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>DefaultComponent</td><td>{2FAFF396-FED2-42C9-B3E0-87F300282EF6}</td><td>TARGETDIR</td><td>0</td><td/><td>typing.exe</td><td>51729</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 	</table>
 
@@ -151,10 +151,10 @@
 		<col def="S255">ISFolderName</col>
 		<row><td>COMMONFILES</td><td>PROGRAMFILES</td><td>Common Files</td><td/><td>0</td><td/></row>
 		<row><td>COMMONFILES64</td><td>PROGRAMFILES64</td><td>Common Files (64-bit)</td><td/><td>0</td><td/></row>
+		<row><td>CommonAppDataFolder</td><td>ISRUNTIMETEXTSUBS</td><td>CommonAppDataFolder</td><td/><td>0</td><td/></row>
 		<row><td>DesktopFolder</td><td/><td>Desktop</td><td/><td>3</td><td/></row>
 		<row><td>FOLDER_FONTS</td><td>WINDIR</td><td>Fonts Folder</td><td/><td>0</td><td/></row>
 		<row><td>ISRUNTIMETEXTSUBS</td><td/><td>Script-defined Folders</td><td/><td>0</td><td/></row>
-		<row><td>LocalAppDataFolder</td><td>ISRUNTIMETEXTSUBS</td><td>LocalAppDataFolder</td><td/><td>0</td><td/></row>
 		<row><td>PROGRAMFILES</td><td/><td>Program Files</td><td/><td>0</td><td/></row>
 		<row><td>PROGRAMFILES64</td><td/><td>Program Files (64-bit)</td><td/><td>0</td><td/></row>
 		<row><td>ProgramMenuFolder</td><td/><td>Programs</td><td/><td>3</td><td/></row>
@@ -188,7 +188,7 @@
 	<table name="FeatureComponents">
 		<col key="yes" def="s38">Feature_</col>
 		<col key="yes" def="s72">Component_</col>
-		<row><td>{4DEB5A96-5CFD-4221-8DBD-0DF3AA958F2D}</td><td>Database</td></row>
+		<row><td>{4DEB5A96-5CFD-4221-8DBD-0DF3AA958F2D}</td><td>CommonDatabase</td></row>
 		<row><td>{4DEB5A96-5CFD-4221-8DBD-0DF3AA958F2D}</td><td>DefaultComponent</td></row>
 	</table>
 
@@ -204,10 +204,10 @@
 		<col def="S255">ISBuildSourcePath</col>
 		<col def="I4">ISAttributes</col>
 		<col def="S72">ISComponentSubFolder_</col>
-		<row><td>keys.mdb</td><td>Database</td><td>keys.mdb</td><td>0</td><td/><td/><td/><td>1</td><td>&lt;ISProjectDataFolder&gt;\Install Files\Database\keys.mdb</td><td>1</td><td/></row>
-		<row><td>ranking.mdb</td><td>Database</td><td>ranking.mdb</td><td>0</td><td/><td/><td/><td>1</td><td>&lt;ISPROJECTDIR&gt;\Install Files\Database\ranking.mdb</td><td>1</td><td/></row>
+		<row><td>keys.mdb</td><td>CommonDatabase</td><td>keys.mdb</td><td>0</td><td/><td/><td/><td>1</td><td>&lt;ISProjectDataFolder&gt;\Install Files\Database\keys.mdb</td><td>1</td><td/></row>
+		<row><td>ranking.mdb</td><td>CommonDatabase</td><td>ranking.mdb</td><td>0</td><td/><td/><td/><td>1</td><td>&lt;ISPROJECTDIR&gt;\Install Files\Database\ranking.mdb</td><td>1</td><td/></row>
 		<row><td>typing.exe</td><td>DefaultComponent</td><td>Typing.exe</td><td>0</td><td/><td/><td/><td>1</td><td>&lt;ISProjectFolder&gt;\Release\Typing.exe</td><td>1</td><td/></row>
-		<row><td>words.mdb</td><td>Database</td><td>words.mdb</td><td>0</td><td/><td/><td/><td>1</td><td>&lt;ISProjectDataFolder&gt;\Install Files\Database\words.mdb</td><td>1</td><td/></row>
+		<row><td>words.mdb</td><td>CommonDatabase</td><td>words.mdb</td><td>0</td><td/><td/><td/><td>1</td><td>&lt;ISProjectDataFolder&gt;\Install Files\Database\words.mdb</td><td>1</td><td/></row>
 	</table>
 
 	<table name="Font">
@@ -242,7 +242,7 @@
 		<col def="S0">FTPLocation</col>
 		<col def="S0">HTTPLocation</col>
 		<col def="S0">Miscellaneous</col>
-		<row><td>Database</td><td/><td/><td>_5749C99E_F7E8_4282_B1BC_044ED15A9531_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>CommonDatabase</td><td/><td/><td>_5749C99E_F7E8_4282_B1BC_044ED15A9531_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>DefaultComponent</td><td/><td/><td>_AB2EB241_F646_47CD_B2B9_12A40FAECB85_FILTER</td><td/><td/><td/><td/></row>
 	</table>
 

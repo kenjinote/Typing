@@ -698,7 +698,7 @@ template<class Interface> inline void SafeRelease(Interface** ppInterfaceToRelea
 
 void GetAppFolderPath(OUT LPWSTR lpszFolderPath)
 {
-	if (SHGetSpecialFolderPath(hWnd, lpszFolderPath, CSIDL_LOCAL_APPDATA, 0))
+	if (SHGetSpecialFolderPath(hWnd, lpszFolderPath, CSIDL_COMMON_APPDATA, 0))
 	{
 		PathAppend(lpszFolderPath, szWindowClass);
 		if (!PathFileExists(lpszFolderPath))
@@ -1757,6 +1757,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 				if (g.nGameState == GAME_STATE::GS_GAMESTART)
 				{
+					if (0)
 					{
 						// スコアを表示
 						WCHAR szText[1024];

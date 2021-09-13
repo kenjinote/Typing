@@ -50,7 +50,7 @@ begin
     bLicenseAccepted = FALSE;
     
     
-    FeatureSetTarget(MEDIA, "<LocalAppDataFolder>", FOLDER_LOCAL_APPDATA ^ "Typing");
+    FeatureSetTarget(MEDIA, "<CommonAppDataFolder>", FOLDER_COMMON_APPDATA ^ "Typing");
 
 // Beginning of UI Sequence
 Dlg_Start:
@@ -155,4 +155,43 @@ Dlg_SdStartCopy2:
     SetStatusExStaticText( SdLoadString( IDS_IFX_STATUSEX_STATICTEXT_FIRSTUI ) );
  
     return 0;
+end;
+
+//---------------------------------------------------------------------------
+// OnFirstUIAfter
+//
+// First Install UI Sequence - After Move Data
+//
+// The OnFirstUIAfter event called by OnShowUI after the file transfer
+// of the setup when the setup is running in first install mode. By default
+// this event displays UI that informs the end user that the setup has been
+// completed successfully.
+//
+// Note: This event will not be called automatically in a
+// program...endprogram style setup.
+//---------------------------------------------------------------------------
+function OnFirstUIAfter()
+    STRING szTitle, szMsg1, szMsg2, szOpt1, szOpt2;
+    NUMBER bvOpt1, bvOpt2;
+begin
+
+    SetObjectPermissions (FOLDER_COMMON_APPDATA ^ "Typing", IS_PERMISSIONS_TYPE_FOLDER, "", "Everyone", GENERIC_ALL, IS_PERMISSIONS_OPTION_ALLOW_ACCESS);
+
+    ShowObjWizardPages(NEXT);
+    
+    szTitle = "";
+    szMsg1 = ""; 
+    szMsg2 = "";
+    szOpt1 = "";
+    szOpt2 = "";
+	bvOpt1   = FALSE;
+    bvOpt2   = FALSE;    
+    
+    //{{IS_SCRIPT_TAG(Dlg_SdDinishEx)	
+    if ( BATCH_INSTALL ) then
+    	SdFinishReboot ( szTitle , szMsg1 , SYS_BOOTMACHINE , szMsg2 , 0 );
+    else
+	    SdFinish ( szTitle , szMsg1 , szMsg2 , szOpt1 , szOpt2 , bvOpt1 , bvOpt2 );
+	endif;
+    //}}IS_SCRIPT_TAG(Dlg_SdDinishEx)	
 end;
