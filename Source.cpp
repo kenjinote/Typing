@@ -1759,7 +1759,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					{
 						// スコアを表示
 						WCHAR szText[1024];
-						wsprintf(szText, L"%d時間　%d打鍵　%dミス", g.nTimeCount, g.nTypeCountRome, g.nMissCount);
+						wsprintf(szText, L"%d秒　%d打鍵　%dミス", g.nTimeCount, g.nTypeCountRome, g.nMissCount);
 						DWRITE_TEXT_METRICS tTextMetrics;
 						{
 							IDWriteTextLayout* pTextLayout = NULL;
