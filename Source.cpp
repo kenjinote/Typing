@@ -24,7 +24,7 @@
 #include <string>
 #include "resource.h"
 
-#define MAX_SOUND_COUNT 5
+#define MAX_SOUND_COUNT 6
 #define DEFAULT_DPI 96
 #define SCALEX(X) MulDiv(X, uDpiX, DEFAULT_DPI)
 #define SCALEY(Y) MulDiv(Y, uDpiY, DEFAULT_DPI)
@@ -47,7 +47,7 @@ HWND hWnd;
 WCHAR szTitle[MAX_LOADSTRING];
 WCHAR szWindowClass[MAX_LOADSTRING];
 IDirectSoundBuffer* dsb1[MAX_SOUND_COUNT];
-int nSoundResourceID[MAX_SOUND_COUNT] = { IDR_WAVE1,IDR_WAVE2,IDR_WAVE3,IDR_WAVE4,IDR_WAVE5 };
+int nSoundResourceID[MAX_SOUND_COUNT] = { IDR_WAVE1,IDR_WAVE2,IDR_WAVE3,IDR_WAVE4,IDR_WAVE5,IDR_WAVE6 };
 
 struct kana
 {
@@ -1699,6 +1699,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		{
 			KillTimer(hWnd, 1001);
 			g.nGameState = GS_GAMESTATUS;
+			PlaySound(5);
 			InvalidateRect(hWnd, 0, 0);
 		}
 		else if (wParam == 1002)
@@ -2126,6 +2127,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			{
 				KillTimer(hWnd, 1000);
 				g.nGameState = GS_TITLE;
+				PlaySound(5);
 				InvalidateRect(hWnd, 0, 0);
 			}
 		}
@@ -2135,6 +2137,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			{
 				KillTimer(hWnd, 1001);
 				g.nGameState = GS_GAMESTATUS;
+				PlaySound(5);
 				InvalidateRect(hWnd, 0, 0);
 			}
 		}
@@ -2143,12 +2146,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			if (wParam == VK_SPACE)
 			{
 				g.nGameState = GS_TITLE;
+				PlaySound(5);
 				InvalidateRect(hWnd, 0, 0);
 			}
 			else if (wParam == 'R')
 			{
 				GetRankingFromDatabase(ranking, 1);
 				g.nGameState = GS_RANKING;
+				PlaySound(5);
 				InvalidateRect(hWnd, 0, 0);
 			}
 		}
@@ -2159,12 +2164,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				g.nCountDown = 4;
 				g.nGameState = GS_COUNTDOWN;
 				SetTimer(hWnd, 1002, 1000, NULL);
+				PlaySound(5);
 				InvalidateRect(hWnd, 0, 0);
 			}
 			else if (wParam == 'R')
 			{
 				GetRankingFromDatabase(ranking, 1);
 				g.nGameState = GS_RANKING;
+				PlaySound(5);
 				InvalidateRect(hWnd, 0, 0);
 			}
 		}
@@ -2173,6 +2180,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			if (wParam == VK_SPACE)
 			{
 				g.nGameState = GS_TITLE;
+				PlaySound(5);
 				InvalidateRect(hWnd, 0, 0);
 			}
 		}

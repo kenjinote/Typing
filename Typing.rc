@@ -60,6 +60,8 @@ IDR_WAVE4               WAVE                    "resources\\sound4.wav"
 
 IDR_WAVE5               WAVE                    "resources\\sound5.wav"
 
+IDR_WAVE6               WAVE                    "resources\\sound6.wav"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //

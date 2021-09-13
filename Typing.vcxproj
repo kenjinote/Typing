@@ -172,6 +172,7 @@
     <Media Include="resources\sound3.wav" />
     <Media Include="resources\sound4.wav" />
     <Media Include="resources\sound5.wav" />
+    <Media Include="resources\sound6.wav" />
     <Media Include="sound2.wav" />
   </ItemGroup>
   <ItemGroup>

@@ -48,6 +48,9 @@
     <Media Include="resources\sound5.wav">
       <Filter>リソース ファイル</Filter>
     </Media>
+    <Media Include="resources\sound6.wav">
+      <Filter>リソース ファイル</Filter>
+    </Media>
   </ItemGroup>
   <ItemGroup>
     <Font Include="resources\MPLUSRounded1c-Bold.ttf" />
