@@ -15,6 +15,7 @@
 #include <shlobj.h>
 #include <odbcinst.h>
 #include <d2d1.h>
+#include <dwrite_3.h>
 #include <dwrite.h>
 #include <dsound.h>
 #include <wincodec.h>
@@ -576,41 +577,6 @@ std::map<std::wstring, kana> g_rome{
 std::map<std::wstring, std::wstring> g_kana{
 };
 
-std::map<std::wstring, std::wstring> words{
-	{L"健康的なからだをつくるには、栄養バランスのとれた食事、適度な運動、十分な睡眠が重要です。",L"ケンコウテキナカラダヲツクルニハ、エイヨウノバラスノトレタショクジ、テキドナウンドウ、ジュウブンナスイミンガジュウヨウデス。"},
-	{L"この度、弊社では過去に資料請求をしていただいた方に対し、メールマガジンでフォローをさせていただくことになりました。",L"コノタビ,ヘイシャデハカコニシリョウセイキュウヲシテイタダイタカタニタイシ,メールマガジンデフォローサセテイタダクコトニナリマシタ."},
-	{L"最新の研修動向、メールの上手な書き方、ビジネスメール実態調査の最新データなど、プロとしての切り口をお楽しみいただけたらと思います。",L"サイシンノケンシュウドウコウ,メールノジョウズナカキカタ,ビジネスメールノジッタイチョウサノサイシンデータナド,プロトシテノキリクチヲオタノシミイタダケタラトオモイマス."},
-	{L"配信は、毎週月曜日の11時頃を予定しております。",L"ハイシンハ,マイシュウゲツヨウビノジュウイチジゴロヲヨテイシテオリマス."},
-	{L"引き続きよろしくお願いいたします。",L"ヒキツヅキヨロシクオネガイイタシマス."},
-	{L"大変お手数ですが、不要な方は以下のURLから解除をお願い致します。",L"タイヘンオテスウデスガ,フヨウナカタハカキノURLカラカイジョヲオネガイイタシマス."},
-	{L"引き続きよろしくお願いいたします。",L"ヒキツヅキヨロシクオネガイイタシマス."},
-	{L"本日、お電話で以下の講座について、ご予約のキャンセルを承りました。",L"ホンジツ,オデンワデカキノコウザニツイテ,ゴヨヤクノキャンセルヲウケタマワリマシタ."},
-	{L"お振り込みはまだのため、返金等はございません。",L"オフリコミハマダノタメ,ヘンキントウハゴザイマセン."},
-	{L"また機会がございましたら、お申し込みいただけますと幸いです。",L"マタノキカイガゴザイマシタラ,オモウシコミイタダケマストサイワイデス."},
-	{L"ご不明な点やご質問がございましたら、お気軽にご連絡ください。",L"ゴフメイナテンヤゴシツモンガゴザイマシタラ,オキガルニゴレンラククダサイ."},
-	{L"それでは、今後ともよろしくお願いいたします。",L"ソレデハ,コンゴトモヨロシクオネガイイタシマス."},
-	{L"現在、為替変動などの諸事情により、原材料の価格が高騰しております。",L"ゲンザイ,カワセヘンドウナドノショジジョウニヨリ,ゲンザイリョウノカカクガコウトウシテオリマス."},
-	{L"これまでも弊社はスタッフ一丸となり、諸経費の削減やコストを下げる努力を行なってまいりましたが、今後、経営を圧迫しかねない状況に陥っております。",L"コレマデモヘイシャスタッフイチガントナリ,ショケイヒノサクゲンヤコストヲサゲルドリョクヲオコナッテマイリマシタガ,コンゴ,ケイヒヲアッパクシカネナイジョウキョウニオチイッテオリマス."},
-	{L"誠に遺憾ではありますが、検討を重ねた結果、来月から以下3商品の価格を改定させていただくことになりました。",L"マコトニイカンデハアリマスガ,ケントウヲカサネタケッカ,ライゲツカライカノ3ショウヒンノカカクヲカイテイサセテイタダクコトニナリマシタ."},
-	{L"なにとぞご理解のほどお願いいたします。",L"ナニトゾゴリカイノホドオネガイイタシマス."},
-	{L"このたびは、弊社の営業時間変更のご連絡でメールをいたしました。",L"コノタビハ,ヘイシャノエイギョウジカンヘンコウノゴレンラクデメールヲイタシマシタ."},
-	{L"以下の店頭窓口の営業時間を次の通り変更いたしますので、ご確認のほどよろしくお願いいたします。",L"イカノテントウマドグチノエイギョウジカンヲツギノトオリヘンコウイタシマスノデ,ゴカクニンノホドヨロシクオネガイイタシマス."},
-	{L"今後ともスタッフ一同さらに丁寧なサービスを心がけて参ります。",L"コンゴトモスタッフイチドウサラニテイネイナサービスヲココロガケテマイリマス."},
-	{L"このたび長期のお休みをいただくことになりましたので、事前にご連絡をさせていただきました。",L"コノタビハチョウキノオヤスミヲイタダクコトニナリマシタノデ,ジゼンニゴレンラクヲサセテイタダキマシタ."},
-	{L"私の不在期間中は、弊社の田中が担当させていただきますので、何かありましたら以下までご連絡ください。",L"ワタシノフザイキカンチュウハ,ヘイシャノタナカガタントウサセテイタダキマスノデ,ナニカアリマシタラカキマデゴレンラククダサイ."},
-	{L"ご連絡の際は、私をCCに入れていただけますと幸いです。",L"ゴレンラクノサイハ,ワタシヲCCニイレテイタダケマストサイワイデス."},
-	{L"厳正に抽選させていただいた結果、ご当選されましたのでお知らせいたします。",L"ゲンセンニチュウセンサセテイタダイタケッカ,ゴトウセンサレマシタノデオシラセイタシマス."},
-	{L"セミナーの日程は以下のとおりです。",L"セミナーノニッテイハイカノトオリデス."},
-	{L"当日、鈴木様にお会いできるのを楽しみにしております。",L"トウジツ,スズキサマニオアイデキルノヲタノシミニシテオリマス."},
-	{L"なお、万一ご欠席になる場合は、事前にご一報いただければ幸いです。",L"ナオ,マンガイチゴケッセキニナルバアイハ,ジゼンニゴイッポウイタダケレバサイワイデス."},
-	{L"厳正に抽選させていただいた結果、誠に残念ですが落選となりました。",L"ゲンセイニチュウセンサセテイタダイタケッカ,マコトニザンネンデスガラクセントナリマシタ."},
-	{L"興味を持ってお申込みをいただきましたのに、お断りせざるを得ない状況になり、本当に申し訳ございません。",L"キョウミヲモッテオモウシコミイタダキマシタノニ,オコトワリセザルヲエナイジョウキョウニナリ,ホントウニモウシワケゴザイマセン."},
-	{L"また同様のイベントを開催させていただく際には、改めてご案内させていただきます。",L"マタドウヨウノイベントヲカイサイサセテイタダクサイニハ,アラタメテゴアンナイサセテイタダキマス。"},
-	{L"本年の夏季休業は以下の日程となっておりますので、お知らせいたします。",L"ホンネンノカキキュウギョウハイカノニッテイトナッテオリマスノデ,オシラセイタシマス。"},
-	{L"休業期間中はご不便をおかけいたしますが、ご了承くださいますようお願い申し上げます。",L"キュウギョウキカンチュウハゴフベンヲオカケイタシマスガ,ゴリョウショウクダサイマスヨウオネガイモウシアゲマス."},
-	{L"計画停電実施に伴い弊社でも業務体制の変更をいたします。",L"ケイカクテイデンジッシニトモナイヘイシャデモギョウムタイセイノヘンコウヲイタシマス."},
-};
-
 struct sentence
 {
 	std::wstring words;
@@ -676,14 +642,14 @@ struct game
 		nTimeCount = nMaxTimeCount;
 		szInputRome[0] = 0;
 
-#ifdef _DEBUG
-		sentence data;
-		data.words = L"ABCDEFGHIJKLMNOPQRSTUVWXYZ.ABCDEFGHIJKLMNOPQRSTUVWXYZ.ABCDEFGHIJKLMNOPQRSTUVWXYZ.";
-		data.kana = L"ABCDEFGHIJKLMNOPQRSTUVWXYZ.ABCDEFGHIJKLMNOPQRSTUVWXYZ.ABCDEFGHIJKLMNOPQRSTUVWXYZ.";
-		list.push_back(data);
-#else
+//#ifdef _DEBUG
+//		sentence data;
+//		data.words = L"ABCDEFGHIJKLMNOPQRSTUVWXYZ.ABCDEFGHIJKLMNOPQRSTUVWXYZ.ABCDEFGHIJKLMNOPQRSTUVWXYZ.";
+//		data.kana = L"ABCDEFGHIJKLMNOPQRSTUVWXYZ.ABCDEFGHIJKLMNOPQRSTUVWXYZ.ABCDEFGHIJKLMNOPQRSTUVWXYZ.";
+//		list.push_back(data);
+//#else
 		LoadWordsFromDatabase();
-#endif
+//#endif
 
 		lstrcpy(szQuestionKana, list[nQuestionCount].kana.c_str());
 		lstrcpy(szQuestionRome, GetRomeFromKana(szQuestionKana));
@@ -797,46 +763,6 @@ BOOL SQLExecute(HWND hWnd, LPCWSTR lpszMDBFilePath, LPCWSTR lpszSQL)
 		pCon = NULL;
 	}
 	return bRet;
-}
-
-void CreateWordsDatabaseFile(HWND hWnd)
-{
-	// データベースファイルがない場合は作成。
-	LPCWSTR lpszDataBaseFilePath = GetWordsDataBaseFilePath();
-	if (!PathFileExists(lpszDataBaseFilePath))
-	{
-		BOOL bCreateDBError = FALSE;
-		WCHAR szAttributes[1024];
-		wsprintf(szAttributes, L"CREATE_DB=\"%s\" General\0", lpszDataBaseFilePath);
-		if (!SQLConfigDataSource(hWnd, ODBC_ADD_DSN, L"Microsoft Access Driver (*.mdb)", szAttributes))
-		{
-			bCreateDBError = TRUE;
-		}
-
-		if (bCreateDBError)
-		{
-			DeleteFile(lpszDataBaseFilePath);
-			return;
-		}
-
-		// テーブル作成
-		if (!SQLExecute(hWnd, lpszDataBaseFilePath, L"CREATE TABLE item(id COUNTER NOT NULL PRIMARY KEY, category LONG NOT NULL, words VARCHAR NOT NULL, kana VARCHAR NOT NULL);"))
-		{
-			DeleteFile(lpszDataBaseFilePath);
-			return;
-		}
-
-		for (auto i : words)
-		{
-			WCHAR szSQL[1024];
-			swprintf_s(szSQL, L"INSERT INTO item(category, words, kana) VALUES (%d, '%s', '%s');", 1, i.first.c_str(), i.second.c_str());
-			if (!SQLExecute(hWnd, lpszDataBaseFilePath, szSQL))
-			{
-				DeleteFile(lpszDataBaseFilePath);
-				break;
-			}
-		}
-	}
 }
 
 void CreateKeysDatabaseFile(HWND hWnd)
@@ -1533,11 +1459,21 @@ HRESULT LoadResourceBitmap(
 	return hr;
 }
 
+HANDLE GetLocalFont(HMODULE hModule, LPCWSTR lpName, LPCWSTR lpType, LPVOID* ppFontMemory, LPINT pFontMemorySize)
+{
+	HRSRC hRsrc = FindResource(hModule, lpName, lpType);
+	HGLOBAL hResource = LoadResource(hModule, hRsrc);
+	*ppFontMemory = LockResource(hResource);
+	*pFontMemorySize = SizeofResource(hModule, hRsrc);
+	DWORD nFonts;
+	return AddFontMemResourceEx(ppFontMemory, *pFontMemorySize, NULL, &nFonts);
+}
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	static ID2D1Factory* m_pD2DFactory;
 	static IWICImagingFactory* m_pWICFactory;
-	static IDWriteFactory* m_pDWriteFactory;
+	static IDWriteFactory5* m_pDWriteFactory;
 	static ID2D1HwndRenderTarget* m_pRenderTarget;
 	static IDWriteTextFormat* m_pTextFormat;
 	static ID2D1SolidColorBrush* m_pBlackBrush;
@@ -1545,7 +1481,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	static ID2D1SolidColorBrush* m_pRedBrush;
 	static ID2D1Bitmap* m_pBitmap;
 
-	static HFONT hFont;
+	static IDWriteInMemoryFontFileLoader* pInMemoryFontFileLoader;
+	static IDWriteFontFile* pFontFile;
+	static IDWriteFontCollection1* pFontCollection;
+	static IDWriteFontSetBuilder1* fontSetBuilder;
+	static IDWriteFontSet* pFontSet;
+
+	static LPVOID pFontMemory;
+	static INT nFontMemorySize;
+	static HANDLE hLocalFont;
 	static UINT uDpiX = DEFAULT_DPI, uDpiY = DEFAULT_DPI;
 	
 	static game g;
@@ -1558,14 +1502,47 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 			CreateKeysDatabaseFile(hWnd);
 
-			CreateWordsDatabaseFile(hWnd);
-			static const WCHAR msc_fontName[] = L"ＭＳ ゴシック";
 			static const FLOAT msc_fontSize = 50;
 			HRESULT hr = D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &m_pD2DFactory);
 			if (SUCCEEDED(hr))
 				hr = DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(m_pDWriteFactory), reinterpret_cast<IUnknown**>(&m_pDWriteFactory));
 			if (SUCCEEDED(hr))
-				hr = m_pDWriteFactory->CreateTextFormat(msc_fontName, 0, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, msc_fontSize, L"", &m_pTextFormat);
+				hr = m_pDWriteFactory->CreateInMemoryFontFileLoader(&pInMemoryFontFileLoader);
+			if (SUCCEEDED(hr))
+				hr = m_pDWriteFactory->RegisterFontFileLoader(pInMemoryFontFileLoader);
+			if (SUCCEEDED(hr))
+			{
+				hLocalFont = GetLocalFont(GetModuleHandle(0), MAKEINTRESOURCE(IDR_FONT1), RT_FONT, &pFontMemory, &nFontMemorySize);
+				hr = pInMemoryFontFileLoader->CreateInMemoryFontFileReference(m_pDWriteFactory, pFontMemory, nFontMemorySize, nullptr, &pFontFile);
+			}
+			if (SUCCEEDED(hr))
+				hr = m_pDWriteFactory->CreateFontSetBuilder(&fontSetBuilder);
+			if (SUCCEEDED(hr))
+				hr = fontSetBuilder->AddFontFile(pFontFile);
+			if (SUCCEEDED(hr))
+				hr = fontSetBuilder->CreateFontSet(&pFontSet);
+			if (SUCCEEDED(hr))
+				hr = m_pDWriteFactory->CreateFontCollectionFromFontSet(pFontSet, &pFontCollection);
+			WCHAR szFontFamilyName[256] = {};
+			UINT32 uFontCount = pFontCollection->GetFontFamilyCount();
+			if (uFontCount > 0)
+			{
+				IDWriteFontFamily1* pFontFamily = nullptr;
+				hr = pFontCollection->GetFontFamily(0, &pFontFamily);
+				if (SUCCEEDED(hr))
+				{
+					IDWriteLocalizedStrings* string = nullptr;
+					hr = pFontFamily->GetFamilyNames(&string);
+					if (SUCCEEDED(hr))
+					{
+						string->GetString(0, szFontFamilyName, _countof(szFontFamilyName));
+					}
+					SafeRelease(&string);
+				}
+				SafeRelease(&pFontFamily);
+			}
+			if (SUCCEEDED(hr))
+				hr = m_pDWriteFactory->CreateTextFormat(szFontFamilyName, pFontCollection, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, msc_fontSize, L"", &m_pTextFormat);
 			if (SUCCEEDED(hr))
 				hr = CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_IWICImagingFactory, reinterpret_cast<void**>(&m_pWICFactory));
 			if (FAILED(hr))
@@ -1573,13 +1550,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		SendMessage(hWnd, WM_APP, 0, 0);
 
-		// ゲーム開始
-		// ランダムで問題を読み込む
-
+		// タイトル画面を表示
 		g.nGameState = GS_TITLE;
-
-//		g.start();
-//		SetTimer(hWnd, 1000, 1000, 0);
 
 		break;
 	case WM_TIMER:
@@ -2069,13 +2041,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		return DefWindowProc(hWnd, msg, wParam, lParam);
 	case WM_APP:
 		GetScaling(hWnd, &uDpiX, &uDpiY);
-		DeleteObject(hFont);
-		hFont = CreateFontW(-POINT2PIXEL(10), 0, 0, 0, FW_NORMAL, 0, 0, 0, SHIFTJIS_CHARSET, 0, 0, 0, 0, L"MS Shell Dlg");
 		break;
 	case WM_DPICHANGED:
 		SendMessage(hWnd, WM_APP, 0, 0);
 		break;
 	case WM_DESTROY:
+		RemoveFontMemResourceEx(hLocalFont);
+		SafeRelease(&pFontSet);
+		SafeRelease(&fontSetBuilder);
+		SafeRelease(&pFontCollection);
+		SafeRelease(&pFontFile);
+		SafeRelease(&pInMemoryFontFileLoader);
 		SafeRelease(&m_pD2DFactory);
 		SafeRelease(&m_pDWriteFactory);
 		SafeRelease(&m_pRenderTarget);
@@ -2085,7 +2061,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		SafeRelease(&m_pRedBrush);
 		SafeRelease(&m_pBitmap);
 		SafeRelease(&m_pWICFactory);
-		DeleteObject(hFont);
 		CoUninitialize();
 		PostQuitMessage(0);
 		break;

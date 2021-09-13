@@ -173,11 +173,16 @@
     <Media Include="resources\sound3.wav" />
     <Media Include="resources\sound4.wav" />
     <Media Include="resources\sound5.wav" />
-    <Media Include="sound1.wav" />
     <Media Include="sound2.wav" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\background.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="resources\MPLUSRounded1c-Black.ttf" />
+    <Font Include="resources\MPLUSRounded1c-Bold.ttf" />
+    <Font Include="resources\MPLUSRounded1c-Medium.ttf" />
+    <Font Include="resources\MPLUSRounded1c-Thin.ttf" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

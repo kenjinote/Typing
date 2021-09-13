@@ -30,9 +30,6 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Media Include="sound1.wav">
-      <Filter>リソース ファイル</Filter>
-    </Media>
     <Media Include="sound2.wav">
       <Filter>リソース ファイル</Filter>
     </Media>
@@ -57,5 +54,11 @@
     <Image Include="resources\background.jpg">
       <Filter>リソース ファイル</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="resources\MPLUSRounded1c-Medium.ttf" />
+    <Font Include="resources\MPLUSRounded1c-Thin.ttf" />
+    <Font Include="resources\MPLUSRounded1c-Black.ttf" />
+    <Font Include="resources\MPLUSRounded1c-Bold.ttf" />
   </ItemGroup>
 </Project>
