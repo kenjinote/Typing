@@ -22,7 +22,6 @@
 #include <map>
 #include <vector>
 #include <string>
-#include <algorithm>
 #include "resource.h"
 
 #define MAX_SOUND_COUNT 5
@@ -589,7 +588,7 @@ typedef enum {
 	GS_GAMESTART,
 	GS_GAMEEND,
 	GS_GAMESTATUS,
-	GS_RANKINGVIW,
+	GS_RANKING,
 	GS_NAMEINPUT,
 	GS_SETTINGS,
 } GAME_STATE;
@@ -731,6 +730,18 @@ LPCWSTR GetKeysDataBaseFilePath()
 	return szFilePath;
 }
 
+LPCWSTR GetRankingDataBaseFilePath()
+{
+	static WCHAR szFilePath[MAX_PATH] = {};
+	if (szFilePath[0] == L'\0')
+	{
+		GetAppFolderPath(szFilePath);
+		PathAppend(szFilePath, L"ranking.mdb");
+	}
+	return szFilePath;
+}
+
+
 BOOL SQLExecute(HWND hWnd, LPCWSTR lpszMDBFilePath, LPCWSTR lpszSQL)
 {
 	BOOL bRet = FALSE;
@@ -854,6 +865,49 @@ void CreateKeysDatabaseFile(HWND hWnd)
 				pCon->Close();
 			}
 			pCon = NULL;
+		}
+	}
+}
+
+void InsertRanking(HWND hWnd, DWORD category, LPSYSTEMTIME date, double score, double typecount, double misscount)
+{
+	LPCWSTR lpszDataBaseFilePath = GetRankingDataBaseFilePath();
+	if (PathFileExists(lpszDataBaseFilePath))
+	{
+		WCHAR szSQL[1024];
+		double date1;
+		SystemTimeToVariantTime(date, &date1);
+		swprintf_s(szSQL, L"INSERT INTO item(category, date1, score1, typecount1, misscount1) VALUES (%d, %lf, %lf, %lf, %lf);",
+			category, date1, score, typecount, misscount);
+		SQLExecute(hWnd, lpszDataBaseFilePath, szSQL);
+	}
+}
+
+void CreateRankingDatabaseFile(HWND hWnd)
+{
+	// データベースファイルがない場合は作成。
+	LPCWSTR lpszDataBaseFilePath = GetRankingDataBaseFilePath();
+	if (!PathFileExists(lpszDataBaseFilePath))
+	{
+		BOOL bCreateDBError = FALSE;
+		WCHAR szAttributes[1024];
+		wsprintf(szAttributes, L"CREATE_DB=\"%s\" General\0", lpszDataBaseFilePath);
+		if (!SQLConfigDataSource(hWnd, ODBC_ADD_DSN, L"Microsoft Access Driver (*.mdb)", szAttributes))
+		{
+			bCreateDBError = TRUE;
+		}
+
+		if (bCreateDBError)
+		{
+			DeleteFile(lpszDataBaseFilePath);
+			return;
+		}
+
+		// テーブル作成
+		if (!SQLExecute(hWnd, lpszDataBaseFilePath, L"CREATE TABLE item(id COUNTER NOT NULL PRIMARY KEY, category LONG NOT NULL, date1 DATETIME NOT NULL, score1 DOUBLE NOT NULL, typecount1 DOUBLE NOT NULL, misscount1 DOUBLE NOT NULL);"))
+		{
+			DeleteFile(lpszDataBaseFilePath);
+			return;
 		}
 	}
 }
@@ -1087,11 +1141,79 @@ BOOL game::LoadWordsFromDatabase()
 		pCon = NULL;
 	}
 
-	if (list.size() > 0)
-	{
-		//std::random_shuffle(list.begin(), list.end());
-	}
+	return bRet;
+}
 
+BOOL GetRankingFromDatabase(std::wstring& ranking, int nCategory)
+{
+	ranking = L"ランキング\r\n";
+	BOOL bRet = FALSE;
+	_ConnectionPtr pCon(NULL);
+	HRESULT hr = pCon.CreateInstance(__uuidof(Connection));
+	if (SUCCEEDED(hr))
+	{
+		WCHAR szString[1024];
+		wsprintf(szString, L"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=%s;", GetRankingDataBaseFilePath());
+		hr = pCon->Open(szString, _bstr_t(""), _bstr_t(""), adOpenUnspecified);
+		if (SUCCEEDED(hr))
+		{
+			try
+			{
+				_RecordsetPtr pRecordset(NULL);
+				hr = pRecordset.CreateInstance(__uuidof(Recordset));
+				if (SUCCEEDED(hr))
+				{
+					_CommandPtr pCommand(NULL);
+					pCommand.CreateInstance(__uuidof(Command));
+					pCommand->ActiveConnection = pCon;
+					WCHAR szSQL[256];
+					wsprintf(szSQL, L"select top %d * from item where category = %d order by score1 desc;", 10, nCategory);
+					pCommand->CommandText = szSQL;
+					pRecordset = pCommand->Execute(NULL, NULL, adCmdText);
+					if (!pRecordset->EndOfFile)
+					{
+						try
+						{
+							// 先頭のレコードへ移動
+							pRecordset->MoveFirst();
+							int i = 0;
+							while (!pRecordset->EndOfFile)
+							{
+								double date = pRecordset->Fields->GetItem((long)2)->Value;
+								double score = pRecordset->Fields->GetItem((long)3)->Value;
+								double typecount = pRecordset->Fields->GetItem((long)4)->Value;
+								double misscount = pRecordset->Fields->GetItem((long)5)->Value;
+
+								WCHAR szText[1024];
+								SYSTEMTIME st;
+								VariantTimeToSystemTime(date, &st);
+								wsprintf(szText, L"%d位: %d (%04d/%02d/%02d %02d:%02d:%02d)\r\n", i + 1, (int)score, st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
+								ranking += szText;
+								i++;
+								pRecordset->MoveNext();
+							}
+							bRet = TRUE;
+						}
+						catch (_com_error& e)
+						{
+							OutputDebugString(e.Description());
+							bRet = FALSE;
+						}
+					}
+					pRecordset->Close();
+				}
+				pRecordset = NULL;
+			}
+			catch (_com_error& e)
+			{
+				OutputDebugString(e.Description());
+				bRet = FALSE;
+			}
+			pCon->Close();
+		}
+		pCon = NULL;
+	}
+	ranking += L"\r\n[SPACE]キーでタイトルへ";
 	return bRet;
 }
 
@@ -1487,6 +1609,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	static LPVOID pFontMemory;
 	static INT nFontMemorySize;
 	static UINT uDpiX = DEFAULT_DPI, uDpiY = DEFAULT_DPI;
+	static std::wstring ranking;
 	
 	static game g;
 
@@ -1496,6 +1619,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		{
 			CoInitialize(NULL);
 			CreateKeysDatabaseFile(hWnd);
+			CreateRankingDatabaseFile(hWnd);
 			static const FLOAT msc_fontSize = 32;
 			HRESULT hr = D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &m_pD2DFactory);
 			if (SUCCEEDED(hr))
@@ -1556,6 +1680,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			{
 				KillTimer(hWnd, 1000);
 				g.nGameState = GS_GAMEEND;
+				{
+					// ここでRankingに登録
+					SYSTEMTIME time;
+					GetLocalTime(&time);
+					double dCorrectAnswerRate = 1.0 * (g.nTypeCountRome - g.nMissCount) / g.nTypeCountRome;
+					InsertRanking(hWnd, 1, &time, g.nTypeCountRome * pow(dCorrectAnswerRate, 3.0), g.nTypeCountRome, g.nMissCount);
+				}
 				SetTimer(hWnd, 1001, 2000, NULL);
 			}
 			else
@@ -1765,7 +1896,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					// スコアを表示
 					WCHAR szText[1024];
 					double dCorrectAnswerRate = 1.0 * (g.nTypeCountRome - g.nMissCount) / g.nTypeCountRome;
-					swprintf_s(szText, L"[結果]\r\nスコア：%.0f\r\n平均タイプ数：%.2f(回/秒)\r\n正確性：%.2f％\r\n打鍵数：%d回\r\nミスタイプ数：%d回\r\n\r\nスペースキーでタイトルへ",
+					swprintf_s(szText, L"[結果]\r\nスコア：%.0f\r\n平均タイプ数：%.2f(回/秒)\r\n正確性：%.2f％\r\n打鍵数：%d回\r\nミスタイプ数：%d回\r\n\r\n[SPACE]キーでタイトルへ\r\n[R]キーでランキング",
 						g.nTypeCountRome * pow(dCorrectAnswerRate, 3.0), g.nTypeCountRome / 60.0, 100.0 * dCorrectAnswerRate, g.nTypeCountRome, g.nMissCount);
 					DWRITE_TEXT_METRICS tTextMetrics;
 					{
@@ -1791,7 +1922,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				}
 				else if (g.nGameState == GAME_STATE::GS_TITLE)
 				{
-					LPCWSTR lpszText = L"タイトル画面\r\n\r\nスペースキーで開始";
+					LPCWSTR lpszText = L"タイトル画面\r\n\r\n[SPACE]キーで開始\r\n[R]キーでランキング";
 					DWRITE_TEXT_METRICS tTextMetrics;
 					{
 						IDWriteTextLayout* pTextLayout = NULL;
@@ -1841,6 +1972,28 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 							SafeRelease(&pTextLayout);
 						}
+					}
+				}
+				else if (g.nGameState == GAME_STATE::GS_RANKING)
+				{
+					DWRITE_TEXT_METRICS tTextMetrics;
+					{
+						IDWriteTextLayout* pTextLayout = NULL;
+						hr = m_pDWriteFactory->CreateTextLayout(
+							ranking.c_str()
+							, ranking.length()
+							, m_pTextFormat
+							, renderTargetSize.width
+							, renderTargetSize.height
+							, &pTextLayout
+						);
+						pTextLayout->GetMetrics(&tTextMetrics);
+						m_pRenderTarget->DrawTextLayout(D2D1::Point2F(renderTargetSize.width / 2 - tTextMetrics.width / 2
+							, renderTargetSize.height / 2 - tTextMetrics.height / 2),
+							pTextLayout,
+							m_pBlackBrush,
+							D2D1_DRAW_TEXT_OPTIONS_NO_SNAP);
+						SafeRelease(&pTextLayout);
 					}
 				}
 
@@ -1992,6 +2145,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				g.nGameState = GS_TITLE;
 				InvalidateRect(hWnd, 0, 0);
 			}
+			else if (wParam == 'R')
+			{
+				GetRankingFromDatabase(ranking, 1);
+				g.nGameState = GS_RANKING;
+				InvalidateRect(hWnd, 0, 0);
+			}
 		}
 		else if (g.nGameState == GAME_STATE::GS_TITLE)
 		{
@@ -2000,6 +2159,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				g.nCountDown = 4;
 				g.nGameState = GS_COUNTDOWN;
 				SetTimer(hWnd, 1002, 1000, NULL);
+				InvalidateRect(hWnd, 0, 0);
+			}
+			else if (wParam == 'R')
+			{
+				GetRankingFromDatabase(ranking, 1);
+				g.nGameState = GS_RANKING;
+				InvalidateRect(hWnd, 0, 0);
+			}
+		}
+		else if (g.nGameState == GAME_STATE::GS_RANKING)
+		{
+			if (wParam == VK_SPACE)
+			{
+				g.nGameState = GS_TITLE;
 				InvalidateRect(hWnd, 0, 0);
 			}
 		}
