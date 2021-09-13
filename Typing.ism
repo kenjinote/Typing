@@ -205,6 +205,7 @@
 		<col def="I4">ISAttributes</col>
 		<col def="S72">ISComponentSubFolder_</col>
 		<row><td>keys.mdb</td><td>Database</td><td>keys.mdb</td><td>0</td><td/><td/><td/><td>1</td><td>&lt;ISProjectDataFolder&gt;\Install Files\Database\keys.mdb</td><td>1</td><td/></row>
+		<row><td>ranking.mdb</td><td>Database</td><td>ranking.mdb</td><td>0</td><td/><td/><td/><td>1</td><td>&lt;ISPROJECTDIR&gt;\Install Files\Database\ranking.mdb</td><td>1</td><td/></row>
 		<row><td>typing.exe</td><td>DefaultComponent</td><td>Typing.exe</td><td>0</td><td/><td/><td/><td>1</td><td>&lt;ISProjectFolder&gt;\Release\Typing.exe</td><td>1</td><td/></row>
 		<row><td>words.mdb</td><td>Database</td><td>words.mdb</td><td>0</td><td/><td/><td/><td>1</td><td>&lt;ISProjectDataFolder&gt;\Install Files\Database\words.mdb</td><td>1</td><td/></row>
 	</table>
