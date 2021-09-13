@@ -1499,10 +1499,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_CREATE:
 		{
 			CoInitialize(NULL);
-
 			CreateKeysDatabaseFile(hWnd);
-
-			static const FLOAT msc_fontSize = 50;
+			static const FLOAT msc_fontSize = 32;
 			HRESULT hr = D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &m_pD2DFactory);
 			if (SUCCEEDED(hr))
 				hr = DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(m_pDWriteFactory), reinterpret_cast<IUnknown**>(&m_pDWriteFactory));
@@ -1616,7 +1614,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 				hr = m_pD2DFactory->CreateHwndRenderTarget(D2D1::RenderTargetProperties(D2D1_RENDER_TARGET_TYPE_DEFAULT, D2D1::PixelFormat(), DEFAULT_DPI, DEFAULT_DPI, D2D1_RENDER_TARGET_USAGE_NONE, D2D1_FEATURE_LEVEL_DEFAULT), D2D1::HwndRenderTargetProperties(hWnd, size), &m_pRenderTarget);
 				if (SUCCEEDED(hr))
-					hr = m_pRenderTarget->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Black), &m_pBlackBrush);
+					hr = m_pRenderTarget->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::DimGray), &m_pBlackBrush);
 				if (SUCCEEDED(hr))
 					hr = m_pRenderTarget->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::LightGray), &m_pGrayBrush);
 				if (SUCCEEDED(hr))
@@ -1629,7 +1627,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				D2D1_SIZE_F renderTargetSize = m_pRenderTarget->GetSize();
 				m_pRenderTarget->BeginDraw();
 				m_pRenderTarget->SetTransform(D2D1::Matrix3x2F::Identity());
-				m_pRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::White));
+				m_pRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::WhiteSmoke));
 
 				if(0)
 				{
@@ -1781,7 +1779,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					// スコアを表示
 					WCHAR szText[1024];
 					double seitouritu = 1.0 * (g.nTypeCountRome - g.nMissCount) / g.nTypeCountRome;
-					swprintf_s(szText, L"結果\r\n\r\nスコア：%.0f\r\n平均タイプ数：%.2f(回/秒)\r\n正確性：%.2f％\r\n打鍵数：%d回\r\nミスタイプ数：%d回\r\n\r\n\r\nスペースキーでタイトルへ",
+					swprintf_s(szText, L"[結果]\r\nスコア：%.0f\r\n平均タイプ数：%.2f(回/秒)\r\n正確性：%.2f％\r\n打鍵数：%d回\r\nミスタイプ数：%d回\r\n\r\nスペースキーでタイトルへ",
 						g.nTypeCountRome * pow(seitouritu, 3.0), g.nTypeCountRome / 60.0, 100.0 * seitouritu, g.nTypeCountRome, g.nMissCount);
 					DWRITE_TEXT_METRICS tTextMetrics;
 					{
