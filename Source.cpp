@@ -1778,9 +1778,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				{
 					// スコアを表示
 					WCHAR szText[1024];
-					double seitouritu = 1.0 * (g.nTypeCountRome - g.nMissCount) / g.nTypeCountRome;
+					double dCorrectAnswerRate = 1.0 * (g.nTypeCountRome - g.nMissCount) / g.nTypeCountRome;
 					swprintf_s(szText, L"[結果]\r\nスコア：%.0f\r\n平均タイプ数：%.2f(回/秒)\r\n正確性：%.2f％\r\n打鍵数：%d回\r\nミスタイプ数：%d回\r\n\r\nスペースキーでタイトルへ",
-						g.nTypeCountRome * pow(seitouritu, 3.0), g.nTypeCountRome / 60.0, 100.0 * seitouritu, g.nTypeCountRome, g.nMissCount);
+						g.nTypeCountRome * pow(dCorrectAnswerRate, 3.0), g.nTypeCountRome / 60.0, 100.0 * dCorrectAnswerRate, g.nTypeCountRome, g.nMissCount);
 					DWRITE_TEXT_METRICS tTextMetrics;
 					{
 						IDWriteTextLayout* pTextLayout = NULL;
