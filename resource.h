@@ -6,7 +6,6 @@
 #define IDS_CLASS_NAME                  102
 #define IDR_WAVE1                       102
 #define IDR_WAVE2                       103
-#define IDR_JPEG1                       104
 #define IDR_WAVE3                       106
 #define IDR_WAVE4                       107
 #define IDR_WAVE5                       108

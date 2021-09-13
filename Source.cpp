@@ -1459,14 +1459,12 @@ HRESULT LoadResourceBitmap(
 	return hr;
 }
 
-HANDLE GetLocalFont(HMODULE hModule, LPCWSTR lpName, LPCWSTR lpType, LPVOID* ppFontMemory, LPINT pFontMemorySize)
+void GetLocalFont(HMODULE hModule, LPCWSTR lpName, LPCWSTR lpType, LPVOID* ppFontMemory, LPINT pFontMemorySize)
 {
 	HRSRC hRsrc = FindResource(hModule, lpName, lpType);
 	HGLOBAL hResource = LoadResource(hModule, hRsrc);
 	*ppFontMemory = LockResource(hResource);
 	*pFontMemorySize = SizeofResource(hModule, hRsrc);
-	DWORD nFonts;
-	return AddFontMemResourceEx(ppFontMemory, *pFontMemorySize, NULL, &nFonts);
 }
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -1479,7 +1477,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	static ID2D1SolidColorBrush* m_pBlackBrush;
 	static ID2D1SolidColorBrush* m_pGrayBrush;
 	static ID2D1SolidColorBrush* m_pRedBrush;
-	static ID2D1Bitmap* m_pBitmap;
 
 	static IDWriteInMemoryFontFileLoader* pInMemoryFontFileLoader;
 	static IDWriteFontFile* pFontFile;
@@ -1489,7 +1486,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 	static LPVOID pFontMemory;
 	static INT nFontMemorySize;
-	static HANDLE hLocalFont;
 	static UINT uDpiX = DEFAULT_DPI, uDpiY = DEFAULT_DPI;
 	
 	static game g;
@@ -1510,7 +1506,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				hr = m_pDWriteFactory->RegisterFontFileLoader(pInMemoryFontFileLoader);
 			if (SUCCEEDED(hr))
 			{
-				hLocalFont = GetLocalFont(GetModuleHandle(0), MAKEINTRESOURCE(IDR_FONT1), RT_FONT, &pFontMemory, &nFontMemorySize);
+				GetLocalFont(GetModuleHandle(0), MAKEINTRESOURCE(IDR_FONT1), RT_FONT, &pFontMemory, &nFontMemorySize);
 				hr = pInMemoryFontFileLoader->CreateInMemoryFontFileReference(m_pDWriteFactory, pFontMemory, nFontMemorySize, nullptr, &pFontFile);
 			}
 			if (SUCCEEDED(hr))
@@ -1619,8 +1615,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					hr = m_pRenderTarget->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::LightGray), &m_pGrayBrush);
 				if (SUCCEEDED(hr))
 					hr = m_pRenderTarget->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Red), &m_pRedBrush);
-				if (SUCCEEDED(hr))
-					hr = LoadResourceBitmap(m_pRenderTarget, m_pWICFactory, MAKEINTRESOURCE(IDR_JPEG1), L"JPEG", 200, 0, &m_pBitmap);
 			}
 			if (SUCCEEDED(hr))
 			{
@@ -1628,14 +1622,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				m_pRenderTarget->BeginDraw();
 				m_pRenderTarget->SetTransform(D2D1::Matrix3x2F::Identity());
 				m_pRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::WhiteSmoke));
-
-				if(0)
-				{
-					// ビットマップを描画
-					D2D1_SIZE_F size = m_pBitmap->GetSize();
-					D2D1_POINT_2F upperLeftCorner = D2D1::Point2F(0.0f, 0.0f);
-					m_pRenderTarget->DrawBitmap(m_pBitmap, D2D1::RectF(upperLeftCorner.x, upperLeftCorner.y, upperLeftCorner.x + 120.0f, upperLeftCorner.y + 120.0f));
-				}
 
 				if (g.nGameState == GAME_STATE::GS_GAMESTART)
 				{
@@ -2018,11 +2004,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			}
 		}
 		break;
-	case WM_COMMAND:
-		if (LOWORD(wParam) == IDOK)
-		{
-		}
-		break;
 	case WM_NCCREATE:
 		{
 			const HMODULE hModUser32 = GetModuleHandle(L"user32");
@@ -2044,7 +2025,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		SendMessage(hWnd, WM_APP, 0, 0);
 		break;
 	case WM_DESTROY:
-		RemoveFontMemResourceEx(hLocalFont);
 		SafeRelease(&pFontSet);
 		SafeRelease(&fontSetBuilder);
 		SafeRelease(&pFontCollection);
@@ -2057,7 +2037,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		SafeRelease(&m_pBlackBrush);
 		SafeRelease(&m_pGrayBrush);
 		SafeRelease(&m_pRedBrush);
-		SafeRelease(&m_pBitmap);
 		SafeRelease(&m_pWICFactory);
 		CoUninitialize();
 		PostQuitMessage(0);
