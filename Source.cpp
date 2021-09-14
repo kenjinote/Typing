@@ -1146,7 +1146,7 @@ BOOL game::LoadWordsFromDatabase()
 
 BOOL GetRankingFromDatabase(std::wstring& ranking, int nCategory)
 {
-	ranking = L"ランキング\r\n";
+	ranking = L"[ランキング]\r\n";
 	BOOL bRet = FALSE;
 	_ConnectionPtr pCon(NULL);
 	HRESULT hr = pCon.CreateInstance(__uuidof(Connection));
