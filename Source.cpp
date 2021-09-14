@@ -617,7 +617,7 @@ struct game
 		bMiss = FALSE;
 		nMissCount = 0;
 		nQuestionCount = 0;
-		nMaxQuestionCount = 10;
+		nMaxQuestionCount = nMaxTimeCount * 10; // 1 秒間に 10 問はさすがにありえない
 		nCountDown = 0;
 
 		list.clear();
