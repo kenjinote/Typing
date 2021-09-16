@@ -55,4 +55,9 @@
   <ItemGroup>
     <Font Include="resources\MPLUSRounded1c-Bold.ttf" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="resources\icon.ico">
+      <Filter>リソース ファイル</Filter>
+    </Image>
+  </ItemGroup>
 </Project>

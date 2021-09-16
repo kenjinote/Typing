@@ -2242,7 +2242,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPreInst, LPWSTR pCmdLine, in
 		0,
 		0,
 		hInstance,
-		0,
+		LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1)),
 		LoadCursor(0,IDC_ARROW),
 		(HBRUSH)(COLOR_WINDOW + 1),
 		0,

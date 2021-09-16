@@ -73,6 +73,16 @@ IDR_FONT1               FONT                    "resources\\MPLUSRounded1c-Bold.
 
 /////////////////////////////////////////////////////////////////////////////
 //
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_ICON1               ICON                    "resources\\icon.ico"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
 // String Table
 //
 

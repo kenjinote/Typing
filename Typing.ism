@@ -1015,7 +1015,7 @@ UwBJAE4ARwBMAEUAXwBFAFgARQBfAEkATQBBAEcARQABAE0AZQBkAGkAYQA=
 		<col def="S255">ISShortcutName</col>
 		<col def="I4">ISAttributes</col>
 		<row><td>Typing.exe</td><td>typing</td><td>##IDS_SHORTCUT_DISPLAY_NAME1##</td><td/><td>&lt;TARGETDIR&gt;\Typing.exe</td><td/><td/><td/><td>Typing.exe_25BD043777EF486ABFD4B83317F70267.exe</td><td>1</td><td>1</td><td>TARGETDIR</td><td/><td/><td/><td/><td/><td>Typing.exe</td><td>18</td></row>
-		<row><td>Typing.exe1</td><td>DesktopFolder</td><td>##IDS_SHORTCUT_DISPLAY_NAME1##</td><td/><td>&lt;TARGETDIR&gt;\Typing.exe</td><td/><td/><td/><td>Typing.exe1_761D8A8F9E6045E3B09CB4A914263D1E.exe</td><td>1</td><td>1</td><td>TARGETDIR</td><td/><td/><td/><td/><td/><td>Typing.exe1</td><td>18</td></row>
+		<row><td>Typing.exe1</td><td>DesktopFolder</td><td>##IDS_SHORTCUT_DISPLAY_NAME1##</td><td/><td>&lt;TARGETDIR&gt;\Typing.exe</td><td/><td/><td/><td>Typing.exe1_761D8A8F9E6045E3B09CB4A914263D1E.exe</td><td>1</td><td>1</td><td>TARGETDIR</td><td/><td/><td/><td/><td/><td>Typing.exe</td><td>18</td></row>
 	</table>
 
 	<table name="TextStyle">
