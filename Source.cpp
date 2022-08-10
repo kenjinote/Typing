@@ -604,7 +604,7 @@ void PlaySound(int nSoundKind)
 
 struct game
 {
-	game()
+	game() :szInputRome{}, szQuestionKana{}, szQuestionRome{}
 	{
 		nGameState = GS_TITLE;
 		nMaxTimeCount = 60;
@@ -619,7 +619,6 @@ struct game
 		nQuestionCount = 0;
 		nMaxQuestionCount = nMaxTimeCount * 10; // 1 秒間に 10 問はさすがにありえない
 		nCountDown = 0;
-
 		list.clear();
 	}
 
@@ -640,28 +639,16 @@ struct game
 		nMaxTimeCount = 60;
 		nTimeCount = nMaxTimeCount;
 		szInputRome[0] = 0;
-
-//#ifdef _DEBUG
-//		sentence data;
-//		data.words = L"ABCDEFGHIJKLMNOPQRSTUVWXYZ.ABCDEFGHIJKLMNOPQRSTUVWXYZ.ABCDEFGHIJKLMNOPQRSTUVWXYZ.";
-//		data.kana = L"ABCDEFGHIJKLMNOPQRSTUVWXYZ.ABCDEFGHIJKLMNOPQRSTUVWXYZ.ABCDEFGHIJKLMNOPQRSTUVWXYZ.";
-//		list.push_back(data);
-//#else
 		LoadWordsFromDatabase();
-//#endif
-
 		lstrcpy(szQuestionKana, list[nQuestionCount].kana.c_str());
 		lstrcpy(szQuestionRome, GetRomeFromKana(szQuestionKana));
-
 		nGameState = GS_GAMESTART;
 	}
 	void next()
 	{
 		nQuestionCount++;
-
 		lstrcpy(szQuestionKana, list[nQuestionCount % list.size()].kana.c_str());
-		lstrcpy(szQuestionRome, GetRomeFromKana(szQuestionKana));
-			
+		lstrcpy(szQuestionRome, GetRomeFromKana(szQuestionKana));			
 		szInputRome[0] = 0;
 		nCursorKana = 0;
 		nCursorRome = 0;
@@ -1362,7 +1349,7 @@ BOOL JudgeFromKana(IN LPCWSTR lpszInputAlphabet, IN LPCWSTR lpszKana, IN int nCu
 		}
 
 		const std::wstring& kana = i->second.kana1;
-		if (StrCmpN(lpszKana + nCursorKana, kana.c_str(), kana.length()) == 0)
+		if (StrCmpN(lpszKana + nCursorKana, kana.c_str(), (int)kana.length()) == 0)
 		{
 			lstrcpy(lpszOutputKana, kana.c_str());
 			lstrcpy(lpszOutputRome, i->first.c_str());
@@ -1584,9 +1571,11 @@ HRESULT LoadResourceBitmap(
 void GetLocalFont(HMODULE hModule, LPCWSTR lpName, LPCWSTR lpType, LPVOID* ppFontMemory, LPINT pFontMemorySize)
 {
 	HRSRC hRsrc = FindResource(hModule, lpName, lpType);
-	HGLOBAL hResource = LoadResource(hModule, hRsrc);
-	*ppFontMemory = LockResource(hResource);
-	*pFontMemorySize = SizeofResource(hModule, hRsrc);
+	if (hRsrc) {
+		HGLOBAL hResource = LoadResource(hModule, hRsrc);
+		*ppFontMemory = LockResource(hResource);
+		*pFontMemorySize = SizeofResource(hModule, hRsrc);
+	}
 }
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -1617,7 +1606,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_CREATE:
 		{
-			CoInitialize(NULL);
+			(void)CoInitialize(NULL);
 			CreateKeysDatabaseFile(hWnd);
 			CreateRankingDatabaseFile(hWnd);
 			static const FLOAT msc_fontSize = 32;
@@ -1983,22 +1972,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 						IDWriteTextLayout* pTextLayout = NULL;
 						hr = m_pDWriteFactory->CreateTextLayout(
 							ranking.c_str()
-							, ranking.length()
+							, (UINT32)ranking.length()
 							, m_pTextFormat
 							, renderTargetSize.width
 							, renderTargetSize.height
 							, &pTextLayout
 						);
-						pTextLayout->GetMetrics(&tTextMetrics);
-						m_pRenderTarget->DrawTextLayout(D2D1::Point2F(renderTargetSize.width / 2 - tTextMetrics.width / 2
-							, renderTargetSize.height / 2 - tTextMetrics.height / 2),
-							pTextLayout,
-							m_pBlackBrush,
-							D2D1_DRAW_TEXT_OPTIONS_NO_SNAP);
-						SafeRelease(&pTextLayout);
+						if (pTextLayout != nullptr) {
+							pTextLayout->GetMetrics(&tTextMetrics);
+							m_pRenderTarget->DrawTextLayout(D2D1::Point2F(renderTargetSize.width / 2 - tTextMetrics.width / 2
+								, renderTargetSize.height / 2 - tTextMetrics.height / 2),
+								pTextLayout,
+								m_pBlackBrush,
+								D2D1_DRAW_TEXT_OPTIONS_NO_SNAP);
+							SafeRelease(&pTextLayout);
+						}
 					}
 				}
-
 				hr = m_pRenderTarget->EndDraw();
 				if (hr == D2DERR_RECREATE_TARGET)
 				{
@@ -2017,7 +2007,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			if (IsKigo(wParam))
 			{
 				g.nTypeCountRome++;
-
 				if (g.szQuestionKana[g.nCursorKana] == L'ン' && g.szQuestionKana[g.nCursorKana] != L'\0' &&
 					g.szInputRome[0] == L'N' && g.szInputRome[1] == L'\0')
 				{
@@ -2027,7 +2016,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					g.szInputRome[0] = g.szInputRome[1];
 					g.szInputRome[1] = 0;
 				}
-				if (JudgeFromKigou(wParam, g.szQuestionKana, g.nCursorKana))
+				if (JudgeFromKigou((DWORD)wParam, g.szQuestionKana, g.nCursorKana))
 				{
 					g.bMiss = FALSE;
 					g.nCursorKana++;
@@ -2048,7 +2037,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				}
 				InvalidateRect(hWnd, 0, 0);
 			}
-			else if (IsAlphabet(wParam))
+			else if (IsAlphabet((WCHAR)wParam))
 			{
 				WCHAR szInput[2];
 				wsprintf(szInput, L"%c", wParam);
@@ -2229,12 +2218,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPreInst, LPWSTR pCmdLine, int nCmdShow)
+int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nShowCmd)
 {
 	// グローバル文字列を初期化する
 	LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
 	LoadStringW(hInstance, IDS_CLASS_NAME, szWindowClass, MAX_LOADSTRING);
-
 	MSG msg;
 	WNDCLASS wndclass = {
 		CS_HREDRAW | CS_VREDRAW,
@@ -2262,7 +2250,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPreInst, LPWSTR pCmdLine, in
 		hInstance,
 		0
 	);
-
 	DSBUFFERDESC dsbd = {};
 	IDirectSound* ds[MAX_SOUND_COUNT];
 	for (int i = 0; i < MAX_SOUND_COUNT; i++)
