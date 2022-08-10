@@ -863,13 +863,14 @@ UwBJAE4ARwBMAEUAXwBFAFgARQBfAEkATQBBAEcARQABAE0AZQBkAGkAYQA=
 		<row><td>ISMaintenanceExperience</td><td>0</td></row>
 		<row><td>ISOSFilter</td><td>-1</td></row>
 		<row><td>ISShowUpdateUI</td><td>1</td></row>
+		<row><td>ISUpdateNotifications</td><td>0</td></row>
 		<row><td>MIFFileName</td><td>Status</td></row>
 		<row><td>MIFSerial</td><td/></row>
 		<row><td>Owner</td><td/></row>
 		<row><td>SaveAsSchema</td><td/></row>
 		<row><td>SccEnabled</td><td>0</td></row>
 		<row><td>SccPath</td><td/></row>
-		<row><td>SchemaVersion</td><td>777</td></row>
+		<row><td>SchemaVersion</td><td>785</td></row>
 		<row><td>Script</td><td>1</td></row>
 		<row><td>SetupArguments</td><td/></row>
 		<row><td>TARGETDIR</td><td>&lt;FOLDER_APPLICATIONS&gt;\&lt;IFX_COMPANY_NAME&gt;\&lt;IFX_PRODUCT_NAME&gt;</td></row>
@@ -924,6 +925,7 @@ UwBJAE4ARwBMAEUAXwBFAFgARQBfAEkATQBBAEcARQABAE0AZQBkAGkAYQA=
 		<col def="S255">ISComments</col>
 		<row><td>ARPURLINFOABOUT</td><td>https://hack.jp</td><td/></row>
 		<row><td>DWUSINTERVAL</td><td>30</td><td/></row>
+		<row><td>DWUSLINK</td><td/><td/></row>
 		<row><td>DefaultUIFont</td><td>Tahoma8</td><td/></row>
 		<row><td>ISAppExeFile</td><td>YourApp.exe</td><td/></row>
 		<row><td>ISENABLEDWUSFINISHDIALOG</td><td/><td/></row>
