@@ -1154,40 +1154,64 @@ BOOL GetRankingFromDatabase(std::wstring& ranking, int nCategory)
 					pCommand.CreateInstance(__uuidof(Command));
 					pCommand->ActiveConnection = pCon;
 					WCHAR szSQL[256];
-					wsprintf(szSQL, L"select top %d * from item where category = %d order by score1 desc;", 10, nCategory);
+					int id = 0;
+					wsprintf(szSQL, L"select top 1 * from item where category = %d order by date1 desc;", nCategory);
 					pCommand->CommandText = szSQL;
 					pRecordset = pCommand->Execute(NULL, NULL, adCmdText);
 					if (!pRecordset->EndOfFile)
 					{
 						try
 						{
-							// 先頭のレコードへ移動
 							pRecordset->MoveFirst();
-							int i = 0;
-							while (!pRecordset->EndOfFile)
-							{
-								double date = pRecordset->Fields->GetItem((long)2)->Value;
-								double score = pRecordset->Fields->GetItem((long)3)->Value;
-								double typecount = pRecordset->Fields->GetItem((long)4)->Value;
-								double misscount = pRecordset->Fields->GetItem((long)5)->Value;
-
-								WCHAR szText[1024];
-								SYSTEMTIME st;
-								VariantTimeToSystemTime(date, &st);
-								wsprintf(szText, L"%d位: %d (%04d/%02d/%02d %02d:%02d:%02d)\r\n", i + 1, (int)score, st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
-								ranking += szText;
-								i++;
-								pRecordset->MoveNext();
-							}
-							bRet = TRUE;
+							id = pRecordset->Fields->GetItem((long)0)->Value;
 						}
 						catch (_com_error& e)
 						{
 							OutputDebugString(e.Description());
 							bRet = FALSE;
 						}
+						pRecordset->Close();
 					}
-					pRecordset->Close();
+					if (id > 0)
+					{
+						wsprintf(szSQL, L"select top %d * from item where category = %d order by score1 desc;", 10, nCategory);
+						pCommand->CommandText = szSQL;
+						pRecordset = pCommand->Execute(NULL, NULL, adCmdText);
+						if (!pRecordset->EndOfFile)
+						{
+							try
+							{
+								pRecordset->MoveFirst();
+								int i = 0;
+								while (!pRecordset->EndOfFile)
+								{
+									const int id_ = pRecordset->Fields->GetItem((long)0)->Value;
+									double date = pRecordset->Fields->GetItem((long)2)->Value;
+									double score = pRecordset->Fields->GetItem((long)3)->Value;
+									double typecount = pRecordset->Fields->GetItem((long)4)->Value;
+									double misscount = pRecordset->Fields->GetItem((long)5)->Value;
+									WCHAR szText[1024];
+									SYSTEMTIME st;
+									VariantTimeToSystemTime(date, &st);
+									wsprintf(szText, L"%d位: %d (%04d/%02d/%02d %02d:%02d:%02d)", i + 1, (int)score, st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);									
+									if (id == id_) {
+										lstrcat(szText, L" ☚ 直近");
+									}
+									lstrcat(szText, L"\r\n");
+									ranking += szText;
+									i++;
+									pRecordset->MoveNext();
+								}
+								bRet = TRUE;
+							}
+							catch (_com_error& e)
+							{
+								OutputDebugString(e.Description());
+								bRet = FALSE;
+							}
+						}
+						pRecordset->Close();
+					}
 				}
 				pRecordset = NULL;
 			}
@@ -1347,7 +1371,6 @@ BOOL JudgeFromKana(IN LPCWSTR lpszInputAlphabet, IN LPCWSTR lpszKana, IN int nCu
 		{
 			return FALSE;
 		}
-
 		const std::wstring& kana = i->second.kana1;
 		if (StrCmpN(lpszKana + nCursorKana, kana.c_str(), (int)kana.length()) == 0)
 		{
@@ -1887,7 +1910,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					// スコアを表示
 					WCHAR szText[1024];
 					double dCorrectAnswerRate = 1.0 * (g.nTypeCountRome - g.nMissCount) / g.nTypeCountRome;
-					swprintf_s(szText, L"[結果]\r\nスコア：%.0f\r\n平均タイプ数：%.2f(回/秒)\r\n正確性：%.2f％\r\n打鍵数：%d回\r\nミスタイプ数：%d回\r\n\r\n[SPACE]キーでタイトルへ\r\n[R]キーでランキング",
+					swprintf_s(szText, L"[結果]\r\nスコア：%.0f\r\n平均タイプ数：%.2f(回/秒)\r\n正確性：%.2f％\r\n打鍵数：%d回\r\nミスタイプ数：%d回\r\n\r\n[SPACE]キーでタイトルへ\r\n[R]キーでランキング\r\n[X]キーで終了",
 						g.nTypeCountRome * pow(dCorrectAnswerRate, 3.0), g.nTypeCountRome / 60.0, 100.0 * dCorrectAnswerRate, g.nTypeCountRome, g.nMissCount);
 					DWRITE_TEXT_METRICS tTextMetrics;
 					{
@@ -1913,7 +1936,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				}
 				else if (g.nGameState == GAME_STATE::GS_TITLE)
 				{
-					LPCWSTR lpszText = L"タイトル画面\r\n\r\n[SPACE]キーで開始\r\n[R]キーでランキング";
+					LPCWSTR lpszText = L"タイトル画面\r\n\r\n[SPACE]キーで開始\r\n[R]キーでランキング\r\n[X]キーで終了";
 					DWRITE_TEXT_METRICS tTextMetrics;
 					{
 						IDWriteTextLayout* pTextLayout = NULL;
@@ -2146,6 +2169,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				PlaySound(5);
 				InvalidateRect(hWnd, 0, 0);
 			}
+			else if (wParam == 'X')
+			{
+				PostMessage(hWnd, WM_CLOSE, 0, 0);
+			}
 		}
 		else if (g.nGameState == GAME_STATE::GS_TITLE)
 		{
@@ -2163,6 +2190,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				g.nGameState = GS_RANKING;
 				PlaySound(5);
 				InvalidateRect(hWnd, 0, 0);
+			}
+			else if (wParam == 'X')
+			{
+				PostMessage(hWnd, WM_CLOSE, 0, 0);
 			}
 		}
 		else if (g.nGameState == GAME_STATE::GS_RANKING)
