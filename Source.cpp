@@ -1,19 +1,15 @@
 ﻿#pragma comment(linker,"\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
-
 #pragma comment(lib, "shlwapi")
 #pragma comment(lib, "d2d1")
 #pragma comment(lib, "dwrite")
 #pragma comment(lib, "dsound")
 #pragma comment(lib, "legacy_stdio_definitions")
 #pragma comment(lib, "windowscodecs.lib")
-
-#import "C:\Program Files (x86)\Common Files\Microsoft Shared\DAO\dao360.dll" rename_namespace("DAO") rename("EOF", "adoEOF")
-#import "C:\Program Files (x86)\Common Files\System\ado\msado60.tlb" no_namespace rename("EOF", "EndOfFile")
-
 #include <windows.h>
 #include <shlwapi.h>
 #include <shlobj.h>
-#include <odbcinst.h>
+#include "sqlite3.h"
+#include "words_data.h"
 #include <d2d1.h>
 #include <dwrite_3.h>
 #include <dwrite.h>
@@ -23,14 +19,12 @@
 #include <vector>
 #include <string>
 #include "resource.h"
-
 #define MAX_SOUND_COUNT 6
 #define DEFAULT_DPI 96
 #define SCALEX(X) MulDiv(X, uDpiX, DEFAULT_DPI)
 #define SCALEY(Y) MulDiv(Y, uDpiY, DEFAULT_DPI)
 #define POINT2PIXEL(PT) MulDiv(PT, uDpiY, DEFAULT_DPI)
 #define MAX_LOADSTRING 100
-
 #ifdef _DEBUG
 #   define debuglog( str, ... ) \
       { \
@@ -41,21 +35,18 @@
 #else
 #    define debuglog( str, ... ) // 空実装
 #endif
-
 // グローバル変数:
 HWND hWnd;
 WCHAR szTitle[MAX_LOADSTRING];
 WCHAR szWindowClass[MAX_LOADSTRING];
 IDirectSoundBuffer* dsb1[MAX_SOUND_COUNT];
 int nSoundResourceID[MAX_SOUND_COUNT] = { IDR_WAVE1,IDR_WAVE2,IDR_WAVE3,IDR_WAVE4,IDR_WAVE5,IDR_WAVE6 };
-
 struct kana
 {
 	kana(LPCWSTR s, DATE d) :kana1(s), priority(d) {};
 	std::wstring kana1;
 	DATE priority;
 };
-
 std::map<std::wstring, kana> g_rome{
 	{L"A",{L"ア",1.0}},
 	{L"BA",{L"バ",0.0}},
@@ -572,16 +563,13 @@ std::map<std::wstring, kana> g_rome{
 	{L"ZZYO",{L"ッジョ",0.0}},
 	{L"ZZYU",{L"ッジュ",0.0}},
 };
-
 std::map<std::wstring, std::wstring> g_kana{
 };
-
 struct sentence
 {
 	std::wstring words;
 	std::wstring kana;
 };
-
 typedef enum {
 	GS_TITLE,
 	GS_COUNTDOWN,
@@ -592,16 +580,14 @@ typedef enum {
 	GS_NAMEINPUT,
 	GS_SETTINGS,
 } GAME_STATE;
-
 void PlaySound(int nSoundKind)
 {
-	if (0 <= nSoundKind && nSoundKind < MAX_SOUND_COUNT)
+	if (0 <= nSoundKind && nSoundKind < MAX_SOUND_COUNT && dsb1[nSoundKind] != nullptr)
 	{
 		dsb1[nSoundKind]->SetCurrentPosition(0);
 		dsb1[nSoundKind]->Play(0, 0, 0);
 	}
 }
-
 struct game
 {
 	game() :szInputRome{}, szQuestionKana{}, szQuestionRome{}
@@ -617,14 +603,12 @@ struct game
 		bMiss = FALSE;
 		nMissCount = 0;
 		nQuestionCount = 0;
-		nMaxQuestionCount = nMaxTimeCount * 10; // 1 秒間に 10 問はさすがにありえない
+		nMaxQuestionCount = nMaxTimeCount * 100;
 		nCountDown = 0;
 		list.clear();
 	}
-
 	BOOL LoadWordsFromDatabase();
 	LPWSTR GetRomeFromKana(LPCWSTR);
-
 	void start()
 	{
 		list.clear();
@@ -635,7 +619,7 @@ struct game
 		bMiss = FALSE;
 		nMissCount = 0;
 		nQuestionCount = 0;
-		nMaxQuestionCount = 10;
+		nMaxQuestionCount = nMaxTimeCount * 100;
 		nMaxTimeCount = 60;
 		nTimeCount = nMaxTimeCount;
 		szInputRome[0] = 0;
@@ -673,7 +657,6 @@ struct game
 	std::vector<int> kanakugiri; // どこで区切るかの情報
 	int nCountDown;
 };
-
 template<class Interface> inline void SafeRelease(Interface** ppInterfaceToRelease)
 {
 	if (*ppInterfaceToRelease != NULL)
@@ -682,7 +665,6 @@ template<class Interface> inline void SafeRelease(Interface** ppInterfaceToRelea
 		(*ppInterfaceToRelease) = NULL;
 	}
 }
-
 void GetAppFolderPath(OUT LPWSTR lpszFolderPath)
 {
 	if (SHGetSpecialFolderPath(hWnd, lpszFolderPath, CSIDL_COMMON_APPDATA, 0))
@@ -694,168 +676,101 @@ void GetAppFolderPath(OUT LPWSTR lpszFolderPath)
 		}
 	}
 }
-
 LPCWSTR GetWordsDataBaseFilePath()
 {
 	static WCHAR szFilePath[MAX_PATH] = {};
 	if (szFilePath[0] == L'\0')
 	{
 		GetAppFolderPath(szFilePath);
-		PathAppend(szFilePath, L"words.mdb");
+		PathAppend(szFilePath, L"words.db");
 	}
 	return szFilePath;
 }
-
 LPCWSTR GetKeysDataBaseFilePath()
 {
 	static WCHAR szFilePath[MAX_PATH] = {};
 	if (szFilePath[0] == L'\0')
 	{
 		GetAppFolderPath(szFilePath);
-		PathAppend(szFilePath, L"keys.mdb");
+		PathAppend(szFilePath, L"keys.db");
 	}
 	return szFilePath;
 }
-
 LPCWSTR GetRankingDataBaseFilePath()
 {
 	static WCHAR szFilePath[MAX_PATH] = {};
 	if (szFilePath[0] == L'\0')
 	{
 		GetAppFolderPath(szFilePath);
-		PathAppend(szFilePath, L"ranking.mdb");
+		PathAppend(szFilePath, L"ranking.db");
 	}
 	return szFilePath;
 }
-
-
-BOOL SQLExecute(HWND hWnd, LPCWSTR lpszMDBFilePath, LPCWSTR lpszSQL)
+int sqlite3_exec_w(sqlite3* db, LPCWSTR sql, int (*callback)(void*,int,char**,char**), void* arg, char** errmsg)
 {
-	BOOL bRet = FALSE;
-	HRESULT hr;
-	_ConnectionPtr pCon(NULL);
-	hr = pCon.CreateInstance(__uuidof(Connection));
-	if (SUCCEEDED(hr))
-	{
-		TCHAR szString[1024];
-		wsprintf(szString, L"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=%s;", lpszMDBFilePath);
-		hr = pCon->Open(szString, _bstr_t(""), _bstr_t(""), adOpenUnspecified);
-		if (SUCCEEDED(hr))
-		{
-			bRet = TRUE;
-			try
-			{
-				_CommandPtr pCommand(NULL);
-				pCommand.CreateInstance(__uuidof(Command));
-				pCommand->ActiveConnection = pCon;
-				pCommand->CommandText = lpszSQL;
-				pCommand->Execute(NULL, NULL, adCmdText);
-			}
-			catch (_com_error& e)
-			{
-				MessageBox(hWnd, e.Description(), 0, 0);
-				bRet = FALSE;
-			}
-			pCon->Close();
-		}
-		pCon = NULL;
-	}
-	return bRet;
+	int len = WideCharToMultiByte(CP_UTF8, 0, sql, -1, NULL, 0, NULL, NULL);
+	if (len == 0) return SQLITE_ERROR;
+	char* utf8 = new char[len];
+	WideCharToMultiByte(CP_UTF8, 0, sql, -1, utf8, len, NULL, NULL);
+	int rc = sqlite3_exec(db, utf8, callback, arg, errmsg);
+	delete[] utf8;
+	return rc;
 }
-
+sqlite3_stmt* sqlite3_prepare_w(sqlite3* db, LPCWSTR sql)
+{
+	int len = WideCharToMultiByte(CP_UTF8, 0, sql, -1, NULL, 0, NULL, NULL);
+	if (len == 0) return nullptr;
+	char* utf8 = new char[len];
+	WideCharToMultiByte(CP_UTF8, 0, sql, -1, utf8, len, NULL, NULL);
+	sqlite3_stmt* stmt = nullptr;
+	sqlite3_prepare_v2(db, utf8, -1, &stmt, nullptr);
+	delete[] utf8;
+	return stmt;
+}
+BOOL SQLExecute(HWND hWnd, LPCWSTR lpszDBFilePath, LPCWSTR lpszSQL)
+{
+	sqlite3* db = nullptr;
+	if (sqlite3_open16(lpszDBFilePath, &db) == SQLITE_OK)
+	{
+		char* errmsg = nullptr;
+		int rc = sqlite3_exec_w(db, lpszSQL, NULL, NULL, &errmsg);
+		if (rc != SQLITE_OK && errmsg)
+		{
+			WCHAR szErr[1024];
+			MultiByteToWideChar(CP_UTF8, 0, errmsg, -1, szErr, 1024);
+			MessageBox(hWnd, szErr, 0, 0);
+			sqlite3_free(errmsg);
+		}
+		sqlite3_close(db);
+		return rc == SQLITE_OK;
+	}
+	return FALSE;
+}
 void CreateKeysDatabaseFile(HWND hWnd)
 {
-	// データベースファイルがない場合は作成。
 	LPCWSTR lpszDataBaseFilePath = GetKeysDataBaseFilePath();
 	if (!PathFileExists(lpszDataBaseFilePath))
 	{
-		BOOL bCreateDBError = FALSE;
-		WCHAR szAttributes[1024];
-		wsprintf(szAttributes, L"CREATE_DB=\"%s\" General\0", lpszDataBaseFilePath);
-		if (!SQLConfigDataSource(hWnd, ODBC_ADD_DSN, L"Microsoft Access Driver (*.mdb)", szAttributes))
-		{
-			bCreateDBError = TRUE;
-		}
-
-		if (bCreateDBError)
+		if (!SQLExecute(hWnd, lpszDataBaseFilePath, L"CREATE TABLE item(rome TEXT NOT NULL PRIMARY KEY, kana TEXT NOT NULL, priority REAL NOT NULL);"))
 		{
 			DeleteFile(lpszDataBaseFilePath);
 			return;
 		}
-
-		// テーブル作成
-		if (!SQLExecute(hWnd, lpszDataBaseFilePath, L"CREATE TABLE item(rome VARCHAR NOT NULL PRIMARY KEY, kana VARCHAR NOT NULL, priority DATETIME NOT NULL);"))
+		sqlite3* db = nullptr;
+		if (sqlite3_open16(lpszDataBaseFilePath, &db) == SQLITE_OK)
 		{
-			DeleteFile(lpszDataBaseFilePath);
-			return;
-		}
-
-		for (auto i : g_rome)
-		{
-			WCHAR szSQL[1024];
-			swprintf_s(szSQL, L"INSERT INTO item(rome, kana, priority) VALUES ('%s', '%s', %lf);", i.first.c_str(), i.second.kana1.c_str(), i.second.priority);
-			if (!SQLExecute(hWnd, lpszDataBaseFilePath, szSQL))
+			sqlite3_exec(db, "BEGIN TRANSACTION;", NULL, NULL, NULL);
+			for (auto i : g_rome)
 			{
-				DeleteFile(lpszDataBaseFilePath);
-				break;
+				WCHAR szSQL[1024];
+				swprintf_s(szSQL, L"INSERT INTO item(rome, kana, priority) VALUES ('%s', '%s', %lf);", i.first.c_str(), i.second.kana1.c_str(), (double)i.second.priority);
+				sqlite3_exec_w(db, szSQL, NULL, NULL, NULL);
 			}
-		}
-	}
-
-	{
-		g_kana.clear();
-
-		_ConnectionPtr pCon(NULL);
-		HRESULT hr = pCon.CreateInstance(__uuidof(Connection));
-		if (SUCCEEDED(hr))
-		{
-			TCHAR szString[1024];
-			wsprintf(szString, L"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=%s;", GetKeysDataBaseFilePath());
-			hr = pCon->Open(szString, _bstr_t(""), _bstr_t(""), adOpenUnspecified);
-			if (SUCCEEDED(hr))
-			{
-				try
-				{
-					_RecordsetPtr pRecordset(NULL);
-					hr = pRecordset.CreateInstance(__uuidof(Recordset));
-					if (SUCCEEDED(hr))
-					{
-						_CommandPtr pCommand(NULL);
-						pCommand.CreateInstance(__uuidof(Command));
-						pCommand->ActiveConnection = pCon;
-
-						{
-							WCHAR szSQL[256];
-							lstrcpy(szSQL, L"select * from item order by priority;");
-							pCommand->CommandText = szSQL;
-							pRecordset = pCommand->Execute(NULL, NULL, adCmdText);
-							if (!pRecordset->EndOfFile)
-							{
-								pRecordset->MoveFirst();
-								while (!pRecordset->EndOfFile)
-								{
-									_variant_t rome = pRecordset->Fields->GetItem((long)0)->Value;
-									_variant_t kana = pRecordset->Fields->GetItem((long)1)->Value;
-									g_kana[kana.bstrVal] = rome.bstrVal;
-									pRecordset->MoveNext();
-								}
-							}
-							pRecordset->Close();
-						}
-					}
-					pRecordset = NULL;
-				}
-				catch (_com_error& e)
-				{
-					MessageBox(hWnd, e.Description(), 0, 0);
-				}
-				pCon->Close();
-			}
-			pCon = NULL;
+			sqlite3_exec(db, "COMMIT;", NULL, NULL, NULL);
+			sqlite3_close(db);
 		}
 	}
 }
-
 void InsertRanking(HWND hWnd, DWORD category, LPSYSTEMTIME date, double score, double typecount, double misscount)
 {
 	LPCWSTR lpszDataBaseFilePath = GetRankingDataBaseFilePath();
@@ -870,35 +785,58 @@ void InsertRanking(HWND hWnd, DWORD category, LPSYSTEMTIME date, double score, d
 	}
 }
 
+void CreateWordsDatabaseFile(HWND hWnd)
+{
+	LPCWSTR lpszDataBaseFilePath = GetWordsDataBaseFilePath();
+	if (!PathFileExists(lpszDataBaseFilePath))
+	{
+		sqlite3* db = nullptr;
+		if (sqlite3_open16(lpszDataBaseFilePath, &db) == SQLITE_OK)
+		{
+			sqlite3_exec(db, "CREATE TABLE IF NOT EXISTS item(id INTEGER PRIMARY KEY AUTOINCREMENT, category INTEGER, words TEXT, kana TEXT);", NULL, NULL, NULL);
+			
+			// Empty string or 0 records handling
+			sqlite3_stmt* stmt = nullptr;
+			sqlite3_prepare_v2(db, "SELECT COUNT(*) FROM item", -1, &stmt, NULL);
+			int count = 0;
+			if (sqlite3_step(stmt) == SQLITE_ROW) {
+				count = sqlite3_column_int(stmt, 0);
+			}
+			sqlite3_finalize(stmt);
+			
+			if (count == 0) {
+				sqlite3_exec(db, "BEGIN TRANSACTION;", NULL, NULL, NULL);
+				
+				sqlite3_stmt* ins_stmt = nullptr;
+				sqlite3_prepare_v2(db, "INSERT INTO item(category, words, kana) VALUES (?, ?, ?)", -1, &ins_stmt, NULL);
+				for (int i = 0; i < INITIAL_WORDS_COUNT; i++) {
+					sqlite3_bind_int(ins_stmt, 1, 1);
+					sqlite3_bind_text16(ins_stmt, 2, INITIAL_WORDS[i].words, -1, SQLITE_STATIC);
+					sqlite3_bind_text16(ins_stmt, 3, INITIAL_WORDS[i].kana, -1, SQLITE_STATIC);
+					sqlite3_step(ins_stmt);
+					sqlite3_reset(ins_stmt);
+				}
+				sqlite3_finalize(ins_stmt);
+				
+				sqlite3_exec(db, "COMMIT;", NULL, NULL, NULL);
+			}
+			sqlite3_close(db);
+		}
+	}
+}
+
 void CreateRankingDatabaseFile(HWND hWnd)
 {
-	// データベースファイルがない場合は作成。
 	LPCWSTR lpszDataBaseFilePath = GetRankingDataBaseFilePath();
 	if (!PathFileExists(lpszDataBaseFilePath))
 	{
-		BOOL bCreateDBError = FALSE;
-		WCHAR szAttributes[1024];
-		wsprintf(szAttributes, L"CREATE_DB=\"%s\" General\0", lpszDataBaseFilePath);
-		if (!SQLConfigDataSource(hWnd, ODBC_ADD_DSN, L"Microsoft Access Driver (*.mdb)", szAttributes))
-		{
-			bCreateDBError = TRUE;
-		}
-
-		if (bCreateDBError)
-		{
-			DeleteFile(lpszDataBaseFilePath);
-			return;
-		}
-
-		// テーブル作成
-		if (!SQLExecute(hWnd, lpszDataBaseFilePath, L"CREATE TABLE item(id COUNTER NOT NULL PRIMARY KEY, category LONG NOT NULL, date1 DATETIME NOT NULL, score1 DOUBLE NOT NULL, typecount1 DOUBLE NOT NULL, misscount1 DOUBLE NOT NULL);"))
+		if (!SQLExecute(hWnd, lpszDataBaseFilePath, L"CREATE TABLE item(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, category INTEGER NOT NULL, date1 REAL NOT NULL, score1 REAL NOT NULL, typecount1 REAL NOT NULL, misscount1 REAL NOT NULL);"))
 		{
 			DeleteFile(lpszDataBaseFilePath);
 			return;
 		}
 	}
 }
-
 BOOL IsAlphabet(WCHAR c)
 {
 	if ('A' <= c && c <= 'Z' ||
@@ -908,7 +846,6 @@ BOOL IsAlphabet(WCHAR c)
 	}
 	return FALSE;
 }
-
 LPWSTR game::GetRomeFromKana(LPCWSTR lpszKana)
 {
 	static WCHAR szRome[1024];
@@ -923,7 +860,6 @@ LPWSTR game::GetRomeFromKana(LPCWSTR lpszKana)
 			p++;
 			continue;
 		}
-
 		switch (*p)
 		{
 		case L'　':
@@ -1012,9 +948,7 @@ LPWSTR game::GetRomeFromKana(LPCWSTR lpszKana)
 			}
 			break;
 		}
-
 		int nStep = 0;
-
 		if (*(p + 1) != 0 && *(p + 2) != 0)
 		{
 			WCHAR szKana[4] = { *p, *(p + 1), *(p + 2), 0 };
@@ -1025,7 +959,6 @@ LPWSTR game::GetRomeFromKana(LPCWSTR lpszKana)
 				nStep = 3;
 			}
 		}
-
 		// 2文字探す
 		if (nStep == 0 && *(p + 1) != 0)
 		{
@@ -1037,7 +970,6 @@ LPWSTR game::GetRomeFromKana(LPCWSTR lpszKana)
 				nStep = 2;
 			}
 		}
-
 		// 1文字探す
 		if (nStep == 0)
 		{
@@ -1049,185 +981,142 @@ LPWSTR game::GetRomeFromKana(LPCWSTR lpszKana)
 				nStep = 1;
 			}
 		}
-
 		if (nStep > 0)
 		{
 			p += nStep;
 			continue;
 		}
-
 		break;
 	}
 	return szRome;
 }
-
 BOOL game::LoadWordsFromDatabase()
 {
 	BOOL bRet = FALSE;
-	_ConnectionPtr pCon(NULL);
-	HRESULT hr = pCon.CreateInstance(__uuidof(Connection));
-	if (SUCCEEDED(hr))
+	sqlite3* db = nullptr;
+	if (sqlite3_open16(GetWordsDataBaseFilePath(), &db) == SQLITE_OK)
 	{
-		WCHAR szString[1024];
-		wsprintf(szString, L"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=%s;", GetWordsDataBaseFilePath());
-		hr = pCon->Open(szString, _bstr_t(""), _bstr_t(""), adOpenUnspecified);
-		if (SUCCEEDED(hr))
+		WCHAR szSQL[256];
+		wsprintf(szSQL, L"SELECT * FROM item WHERE category = %d ORDER BY RANDOM() LIMIT %d;", nCategory, nMaxQuestionCount);
+		sqlite3_stmt* stmt = sqlite3_prepare_w(db, szSQL);
+		if (stmt)
 		{
-			try
+			while (sqlite3_step(stmt) == SQLITE_ROW)
 			{
-				_RecordsetPtr pRecordset(NULL);
-				hr = pRecordset.CreateInstance(__uuidof(Recordset));
-				if (SUCCEEDED(hr))
-				{
-					_CommandPtr pCommand(NULL);
-					pCommand.CreateInstance(__uuidof(Command));
-					pCommand->ActiveConnection = pCon;
-					WCHAR szSQL[256];
-					wsprintf(szSQL, L"select top %d * from item where category = %d order by Rnd(INT(NOW*id)-NOW*id);", nMaxQuestionCount, nCategory);
-					pCommand->CommandText = szSQL;
-					pRecordset = pCommand->Execute(NULL, NULL, adCmdText);
-					if (!pRecordset->EndOfFile)
-					{
-						try
-						{
-							// 先頭のレコードへ移動
-							pRecordset->MoveFirst();
-							while (!pRecordset->EndOfFile)
-							{
-								sentence data;
-
-								_variant_t words = pRecordset->Fields->GetItem((long)2)->Value;
-								data.words = std::wstring(words.bstrVal, SysStringLen(words.bstrVal));
-
-								_variant_t kana = pRecordset->Fields->GetItem((long)3)->Value;
-								data.kana = std::wstring(kana.bstrVal, SysStringLen(kana.bstrVal));
-
-								list.push_back(data);
-
-								pRecordset->MoveNext();
-							}
-							bRet = TRUE;
-						}
-						catch (_com_error& e)
-						{
-							OutputDebugString(e.Description());
-							bRet = FALSE;
-						}
-					}
-					pRecordset->Close();
-				}
-				pRecordset = NULL;
+				sentence data;
+				const WCHAR* words = (const WCHAR*)sqlite3_column_text16(stmt, 2);
+				if (words) data.words = words;
+				
+				const WCHAR* kana = (const WCHAR*)sqlite3_column_text16(stmt, 3);
+				if (kana) data.kana = kana;
+				list.push_back(data);
+				bRet = TRUE;
 			}
-			catch (_com_error& e)
-			{
-				OutputDebugString(e.Description());
-				bRet = FALSE;
-			}
-			pCon->Close();
+			sqlite3_finalize(stmt);
 		}
-		pCon = NULL;
+		sqlite3_close(db);
 	}
-
+	if (list.empty())
+	{
+		sentence data;
+		data.words = L"問題データがありません";
+		data.kana = L"モンダイデータガアリマセン";
+		list.push_back(data);
+	}
 	return bRet;
+}
+
+struct HistoryItem {
+	double date;
+	double score;
+	double accuracy;
+};
+
+void GetRankingHistoryFromDatabase(std::vector<HistoryItem>& history, int nCategory)
+{
+	history.clear();
+	sqlite3* db = nullptr;
+	if (sqlite3_open16(GetRankingDataBaseFilePath(), &db) == SQLITE_OK)
+	{
+		WCHAR szSQL[256];
+		wsprintf(szSQL, L"SELECT date1, score1, typecount1, misscount1 FROM item WHERE category = %d ORDER BY date1 ASC LIMIT 3650;", nCategory);
+		sqlite3_stmt* stmt = sqlite3_prepare_w(db, szSQL);
+		if (stmt)
+		{
+			while (sqlite3_step(stmt) == SQLITE_ROW)
+			{
+				HistoryItem item;
+				item.date = sqlite3_column_double(stmt, 0);
+				item.score = sqlite3_column_double(stmt, 1);
+				double typecount = sqlite3_column_double(stmt, 2);
+				double misscount = sqlite3_column_double(stmt, 3);
+				item.accuracy = 0;
+				if (typecount + misscount > 0)
+				{
+					item.accuracy = (typecount / (typecount + misscount)) * 100.0;
+				}
+				history.push_back(item);
+			}
+			sqlite3_finalize(stmt);
+		}
+		sqlite3_close(db);
+	}
 }
 
 BOOL GetRankingFromDatabase(std::wstring& ranking, int nCategory)
 {
 	ranking = L"[ランキング]\r\n";
 	BOOL bRet = FALSE;
-	_ConnectionPtr pCon(NULL);
-	HRESULT hr = pCon.CreateInstance(__uuidof(Connection));
-	if (SUCCEEDED(hr))
+	sqlite3* db = nullptr;
+	if (sqlite3_open16(GetRankingDataBaseFilePath(), &db) == SQLITE_OK)
 	{
-		WCHAR szString[1024];
-		wsprintf(szString, L"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=%s;", GetRankingDataBaseFilePath());
-		hr = pCon->Open(szString, _bstr_t(""), _bstr_t(""), adOpenUnspecified);
-		if (SUCCEEDED(hr))
+		WCHAR szSQL[256];
+		int id = 0;
+		wsprintf(szSQL, L"SELECT * FROM item WHERE category = %d ORDER BY date1 DESC LIMIT 1;", nCategory);
+		sqlite3_stmt* stmt = sqlite3_prepare_w(db, szSQL);
+		if (stmt)
 		{
-			try
+			if (sqlite3_step(stmt) == SQLITE_ROW)
 			{
-				_RecordsetPtr pRecordset(NULL);
-				hr = pRecordset.CreateInstance(__uuidof(Recordset));
-				if (SUCCEEDED(hr))
-				{
-					_CommandPtr pCommand(NULL);
-					pCommand.CreateInstance(__uuidof(Command));
-					pCommand->ActiveConnection = pCon;
-					WCHAR szSQL[256];
-					int id = 0;
-					wsprintf(szSQL, L"select top 1 * from item where category = %d order by date1 desc;", nCategory);
-					pCommand->CommandText = szSQL;
-					pRecordset = pCommand->Execute(NULL, NULL, adCmdText);
-					if (!pRecordset->EndOfFile)
-					{
-						try
-						{
-							pRecordset->MoveFirst();
-							id = pRecordset->Fields->GetItem((long)0)->Value;
-						}
-						catch (_com_error& e)
-						{
-							OutputDebugString(e.Description());
-							bRet = FALSE;
-						}
-						pRecordset->Close();
-					}
-					if (id > 0)
-					{
-						wsprintf(szSQL, L"select top %d * from item where category = %d order by score1 desc;", 10, nCategory);
-						pCommand->CommandText = szSQL;
-						pRecordset = pCommand->Execute(NULL, NULL, adCmdText);
-						if (!pRecordset->EndOfFile)
-						{
-							try
-							{
-								pRecordset->MoveFirst();
-								int i = 0;
-								while (!pRecordset->EndOfFile)
-								{
-									const int id_ = pRecordset->Fields->GetItem((long)0)->Value;
-									double date = pRecordset->Fields->GetItem((long)2)->Value;
-									double score = pRecordset->Fields->GetItem((long)3)->Value;
-									double typecount = pRecordset->Fields->GetItem((long)4)->Value;
-									double misscount = pRecordset->Fields->GetItem((long)5)->Value;
-									WCHAR szText[1024];
-									SYSTEMTIME st;
-									VariantTimeToSystemTime(date, &st);
-									wsprintf(szText, L"%d位: %d (%04d/%02d/%02d %02d:%02d:%02d)", i + 1, (int)score, st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);									
-									if (id == id_) {
-										lstrcat(szText, L" ☚ 直近");
-									}
-									lstrcat(szText, L"\r\n");
-									ranking += szText;
-									i++;
-									pRecordset->MoveNext();
-								}
-								bRet = TRUE;
-							}
-							catch (_com_error& e)
-							{
-								OutputDebugString(e.Description());
-								bRet = FALSE;
-							}
-						}
-						pRecordset->Close();
-					}
-				}
-				pRecordset = NULL;
+				id = sqlite3_column_int(stmt, 0);
 			}
-			catch (_com_error& e)
-			{
-				OutputDebugString(e.Description());
-				bRet = FALSE;
-			}
-			pCon->Close();
+			sqlite3_finalize(stmt);
 		}
-		pCon = NULL;
+		if (id > 0)
+		{
+			wsprintf(szSQL, L"SELECT * FROM item WHERE category = %d ORDER BY score1 DESC LIMIT 10;", nCategory);
+			stmt = sqlite3_prepare_w(db, szSQL);
+			if (stmt)
+			{
+				int i = 0;
+				while (sqlite3_step(stmt) == SQLITE_ROW)
+				{
+					const int id_ = sqlite3_column_int(stmt, 0);
+					double date = sqlite3_column_double(stmt, 2);
+					double score = sqlite3_column_double(stmt, 3);
+					double typecount = sqlite3_column_double(stmt, 4);
+					double misscount = sqlite3_column_double(stmt, 5);
+					
+					WCHAR szText[1024];
+					SYSTEMTIME st;
+					VariantTimeToSystemTime(date, &st);
+					wsprintf(szText, L"%d位: %d (%04d/%02d/%02d %02d:%02d:%02d)", i + 1, (int)score, st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
+					if (id == id_) {
+						lstrcat(szText, L" ☚ 直近");
+					}
+					lstrcat(szText, L"\r\n");
+					ranking += szText;
+					i++;
+				}
+				bRet = TRUE;
+				sqlite3_finalize(stmt);
+			}
+		}
+		sqlite3_close(db);
 	}
-	ranking += L"\r\n[SPACE]キーでタイトルへ";
+	ranking += L"[SPACE]キーでタイトルへ";
 	return bRet;
 }
-
 BOOL GetScaling(HWND hWnd, UINT* pnX, UINT* pnY)
 {
 	BOOL bSetScaling = FALSE;
@@ -1271,7 +1160,6 @@ BOOL GetScaling(HWND hWnd, UINT* pnX, UINT* pnY)
 	}
 	return bSetScaling;
 }
-
 BOOL JudgeFromKigou(DWORD dwKeyCode, LPCWSTR lpszKana, int nCursorKana)
 {
 	switch (lpszKana[nCursorKana])
@@ -1360,7 +1248,6 @@ BOOL JudgeFromKigou(DWORD dwKeyCode, LPCWSTR lpszKana, int nCursorKana)
 	}
 	return FALSE;
 }
-
 BOOL JudgeFromKana(IN LPCWSTR lpszInputAlphabet, IN LPCWSTR lpszKana, IN int nCursorKana, OUT LPWSTR lpszOutputKana, OUT LPWSTR lpszOutputRome)
 {
 	std::map<std::wstring, kana>::const_iterator i = g_rome.lower_bound(lpszInputAlphabet);
@@ -1378,19 +1265,16 @@ BOOL JudgeFromKana(IN LPCWSTR lpszInputAlphabet, IN LPCWSTR lpszKana, IN int nCu
 			lstrcpy(lpszOutputRome, i->first.c_str());
 			return TRUE;
 		}
-
 		i++;
 	}
 	return FALSE;
 }
-
 struct question
 {
 	std::wstring words;
 	std::vector<std::wstring> rome;
 	std::vector<int> time;
 };
-
 BOOL IsKigo(WPARAM wParam)
 {
 	switch (wParam)
@@ -1416,7 +1300,6 @@ BOOL IsKigo(WPARAM wParam)
 	}
 	return FALSE;
 }
-
 BOOL IsKigo(WCHAR c)
 {
 	switch (c)
@@ -1458,7 +1341,6 @@ BOOL IsKigo(WCHAR c)
 	}
 	return FALSE;
 }
-
 BOOL IsBoin(WCHAR c)
 {
 	switch (c)
@@ -1472,7 +1354,6 @@ BOOL IsBoin(WCHAR c)
 	}
 	return FALSE;
 }
-
 HRESULT LoadResourceBitmap(
 	ID2D1RenderTarget* pRenderTarget,
 	IWICImagingFactory* pIWICFactory,
@@ -1488,12 +1369,10 @@ HRESULT LoadResourceBitmap(
 	IWICStream* pStream = NULL;
 	IWICFormatConverter* pConverter = NULL;
 	IWICBitmapScaler* pScaler = NULL;
-
 	HRSRC imageResHandle = NULL;
 	HGLOBAL imageResDataHandle = NULL;
 	void* pImageFile = NULL;
 	DWORD imageFileSize = 0;
-
 	// Locate the resource.
 	imageResHandle = FindResourceW(GetModuleHandle(0), resourceName, resourceType);
 	HRESULT hr = imageResHandle ? S_OK : E_FAIL;
@@ -1501,26 +1380,20 @@ HRESULT LoadResourceBitmap(
 	{
 		// Load the resource.
 		imageResDataHandle = LoadResource(GetModuleHandle(0), imageResHandle);
-
 		hr = imageResDataHandle ? S_OK : E_FAIL;
 	}
-
 	if (SUCCEEDED(hr))
 	{
 		// Lock it to get a system memory pointer.
 		pImageFile = LockResource(imageResDataHandle);
-
 		hr = pImageFile ? S_OK : E_FAIL;
 	}
 	if (SUCCEEDED(hr))
 	{
 		// Calculate the size.
 		imageFileSize = SizeofResource(GetModuleHandle(0), imageResHandle);
-
 		hr = imageFileSize ? S_OK : E_FAIL;
-
 	}
-
 	if (SUCCEEDED(hr))
 	{
 		// Create a WIC stream to map onto the memory.
@@ -1534,7 +1407,6 @@ HRESULT LoadResourceBitmap(
 			imageFileSize
 		);
 	}
-
 	if (SUCCEEDED(hr))
 	{
 		// Create a decoder for the stream.
@@ -1545,20 +1417,17 @@ HRESULT LoadResourceBitmap(
 			&pDecoder
 		);
 	}
-
 	if (SUCCEEDED(hr))
 	{
 		// Create the initial frame.
 		hr = pDecoder->GetFrame(0, &pSource);
 	}
-
 	if (SUCCEEDED(hr))
 	{
 		// Convert the image format to 32bppPBGRA
 		// (DXGI_FORMAT_B8G8R8A8_UNORM + D2D1_ALPHA_MODE_PREMULTIPLIED).
 		hr = pIWICFactory->CreateFormatConverter(&pConverter);
 	}
-
 	if (SUCCEEDED(hr))
 	{
 		hr = pConverter->Initialize(
@@ -1569,7 +1438,6 @@ HRESULT LoadResourceBitmap(
 			0.f,
 			WICBitmapPaletteTypeMedianCut
 		);
-
 		if (SUCCEEDED(hr))
 		{
 			//create a Direct2D bitmap from the WIC bitmap.
@@ -1578,19 +1446,15 @@ HRESULT LoadResourceBitmap(
 				NULL,
 				ppBitmap
 			);
-
 		}
 	}
-
 	SafeRelease(&pDecoder);
 	SafeRelease(&pSource);
 	SafeRelease(&pStream);
 	SafeRelease(&pConverter);
 	SafeRelease(&pScaler);
-
 	return hr;
 }
-
 void GetLocalFont(HMODULE hModule, LPCWSTR lpName, LPCWSTR lpType, LPVOID* ppFontMemory, LPINT pFontMemorySize)
 {
 	HRSRC hRsrc = FindResource(hModule, lpName, lpType);
@@ -1600,89 +1464,128 @@ void GetLocalFont(HMODULE hModule, LPCWSTR lpName, LPCWSTR lpType, LPVOID* ppFon
 		*pFontMemorySize = SizeofResource(hModule, hRsrc);
 	}
 }
-
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	static ID2D1Factory* m_pD2DFactory;
 	static IWICImagingFactory* m_pWICFactory;
-	static IDWriteFactory5* m_pDWriteFactory;
+	static IDWriteFactory* m_pDWriteFactory;
 	static ID2D1HwndRenderTarget* m_pRenderTarget;
 	static IDWriteTextFormat* m_pTextFormat;
+	static IDWriteTextFormat* m_pMediumTextFormat; // 追加: ランキングテキスト用 (サイズ中)
+	static IDWriteTextFormat* m_pSmallTextFormat;  // 追加: グラフ目盛り・凡例用 (サイズ小)
 	static ID2D1SolidColorBrush* m_pBlackBrush;
 	static ID2D1SolidColorBrush* m_pGrayBrush;
 	static ID2D1SolidColorBrush* m_pRedBrush;
-
+	static ID2D1SolidColorBrush* m_pBlueBrush;
+	static ID2D1SolidColorBrush* m_pGreenBrush;
 	static IDWriteInMemoryFontFileLoader* pInMemoryFontFileLoader;
 	static IDWriteFontFile* pFontFile;
 	static IDWriteFontCollection1* pFontCollection;
 	static IDWriteFontSetBuilder1* fontSetBuilder;
 	static IDWriteFontSet* pFontSet;
-
 	static LPVOID pFontMemory;
 	static INT nFontMemorySize;
 	static UINT uDpiX = DEFAULT_DPI, uDpiY = DEFAULT_DPI;
 	static std::wstring ranking;
-	
+	static std::vector<HistoryItem> rankingHistory;
+	static POINT ptMouse = { -1, -1 };
+	static WCHAR szFontFamilyName[256] = L"メイリオ"; // ← ここに追加	
 	static game g;
-
 	switch (msg)
 	{
+	case WM_MOUSEMOVE:
+		ptMouse.x = (int)(short)LOWORD(lParam);
+		ptMouse.y = (int)(short)HIWORD(lParam);
+		if (g.nGameState == GAME_STATE::GS_RANKING) {
+			InvalidateRect(hWnd, 0, 0);
+		}
+		break;
 	case WM_CREATE:
 		{
+			if (g_kana.empty())
+			{
+				for (const auto& item : g_rome)
+				{
+					auto it = g_kana.find(item.second.kana1);
+					// まだ登録がないか、優先度(priority)が1.0以上の標準入力であれば登録・上書き
+					if (it == g_kana.end() || item.second.priority >= 1.0)
+					{
+						g_kana[item.second.kana1] = item.first;
+					}
+				}
+			}
 			(void)CoInitialize(NULL);
 			CreateKeysDatabaseFile(hWnd);
 			CreateRankingDatabaseFile(hWnd);
+			CreateWordsDatabaseFile(hWnd);
 			static const FLOAT msc_fontSize = 32;
 			HRESULT hr = D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &m_pD2DFactory);
 			if (SUCCEEDED(hr))
-				hr = DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(m_pDWriteFactory), reinterpret_cast<IUnknown**>(&m_pDWriteFactory));
-			if (SUCCEEDED(hr))
-				hr = m_pDWriteFactory->CreateInMemoryFontFileLoader(&pInMemoryFontFileLoader);
-			if (SUCCEEDED(hr))
-				hr = m_pDWriteFactory->RegisterFontFileLoader(pInMemoryFontFileLoader);
+				hr = DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), reinterpret_cast<IUnknown**>(&m_pDWriteFactory));
+			
 			if (SUCCEEDED(hr))
 			{
-				GetLocalFont(GetModuleHandle(0), MAKEINTRESOURCE(IDR_FONT1), RT_FONT, &pFontMemory, &nFontMemorySize);
-				hr = pInMemoryFontFileLoader->CreateInMemoryFontFileReference(m_pDWriteFactory, pFontMemory, nFontMemorySize, nullptr, &pFontFile);
-			}
-			if (SUCCEEDED(hr))
-				hr = m_pDWriteFactory->CreateFontSetBuilder(&fontSetBuilder);
-			if (SUCCEEDED(hr))
-				hr = fontSetBuilder->AddFontFile(pFontFile);
-			if (SUCCEEDED(hr))
-				hr = fontSetBuilder->CreateFontSet(&pFontSet);
-			if (SUCCEEDED(hr))
-				hr = m_pDWriteFactory->CreateFontCollectionFromFontSet(pFontSet, &pFontCollection);
-			WCHAR szFontFamilyName[256] = {};
-			UINT32 uFontCount = pFontCollection->GetFontFamilyCount();
-			if (uFontCount > 0)
-			{
-				IDWriteFontFamily1* pFontFamily = nullptr;
-				hr = pFontCollection->GetFontFamily(0, &pFontFamily);
-				if (SUCCEEDED(hr))
+				IDWriteFactory5* pDWriteFactory5 = nullptr;
+				if (SUCCEEDED(m_pDWriteFactory->QueryInterface(__uuidof(IDWriteFactory5), reinterpret_cast<void**>(&pDWriteFactory5))))
 				{
-					IDWriteLocalizedStrings* string = nullptr;
-					hr = pFontFamily->GetFamilyNames(&string);
-					if (SUCCEEDED(hr))
+					if (SUCCEEDED(pDWriteFactory5->CreateInMemoryFontFileLoader(&pInMemoryFontFileLoader)))
 					{
-						string->GetString(0, szFontFamilyName, _countof(szFontFamilyName));
+						if (SUCCEEDED(pDWriteFactory5->RegisterFontFileLoader(pInMemoryFontFileLoader)))
+						{
+							GetLocalFont(GetModuleHandle(0), MAKEINTRESOURCE(IDR_FONT1), RT_FONT, &pFontMemory, &nFontMemorySize);
+							if (SUCCEEDED(pInMemoryFontFileLoader->CreateInMemoryFontFileReference(pDWriteFactory5, pFontMemory, nFontMemorySize, nullptr, &pFontFile)))
+							{
+								if (SUCCEEDED(pDWriteFactory5->CreateFontSetBuilder(&fontSetBuilder)))
+								{
+									if (SUCCEEDED(fontSetBuilder->AddFontFile(pFontFile)))
+									{
+										if (SUCCEEDED(fontSetBuilder->CreateFontSet(&pFontSet)))
+										{
+											if (SUCCEEDED(pDWriteFactory5->CreateFontCollectionFromFontSet(pFontSet, &pFontCollection)))
+											{
+												UINT32 uFontCount = pFontCollection->GetFontFamilyCount();
+												if (uFontCount > 0)
+												{
+													IDWriteFontFamily1* pFontFamily = nullptr;
+													if (SUCCEEDED(pFontCollection->GetFontFamily(0, &pFontFamily)))
+													{
+														IDWriteLocalizedStrings* string = nullptr;
+														if (SUCCEEDED(pFontFamily->GetFamilyNames(&string)))
+														{
+															string->GetString(0, szFontFamilyName, _countof(szFontFamilyName));
+															string->Release();
+														}
+														pFontFamily->Release();
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
 					}
-					SafeRelease(&string);
+					pDWriteFactory5->Release();
 				}
-				SafeRelease(&pFontFamily);
 			}
 			if (SUCCEEDED(hr))
-				hr = m_pDWriteFactory->CreateTextFormat(szFontFamilyName, pFontCollection, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, msc_fontSize, L"", &m_pTextFormat);
+			{
+				IDWriteFontCollection* pCollection = nullptr;
+				if (pFontCollection) pCollection = pFontCollection;
+				hr = m_pDWriteFactory->CreateTextFormat(szFontFamilyName, pCollection, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, msc_fontSize, L"", &m_pTextFormat);
+
+				// --- 以下2行を追加 ---
+				hr = m_pDWriteFactory->CreateTextFormat(szFontFamilyName, pCollection, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 18.0f, L"", &m_pMediumTextFormat);
+				hr = m_pDWriteFactory->CreateTextFormat(szFontFamilyName, pCollection, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 11.0f, L"", &m_pSmallTextFormat);
+			}
 			if (SUCCEEDED(hr))
 				hr = CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_IWICImagingFactory, reinterpret_cast<void**>(&m_pWICFactory));
 			if (FAILED(hr))
 				return -1;
 		}
 		SendMessage(hWnd, WM_APP, 0, 0);
-
 		// タイトル画面を表示
 		g.nGameState = GS_TITLE;
-
 		break;
 	case WM_TIMER:
 		debuglog(L"WM_TIMER %d", wParam);
@@ -1737,6 +1640,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			D2D1_SIZE_U size = { LOWORD(lParam), HIWORD(lParam) };
 			m_pRenderTarget->Resize(size);
 		}
+		if (m_pDWriteFactory)
+		{
+			float h = HIWORD(lParam);
+			float baseSize = h * 0.055f;
+			if (baseSize < 16.0f) baseSize = 16.0f;
+			float mediumSize = baseSize * 0.56f;
+			float smallSize = baseSize * 0.35f;
+			SafeRelease(&m_pTextFormat);
+			SafeRelease(&m_pMediumTextFormat);
+			SafeRelease(&m_pSmallTextFormat);
+			IDWriteFontCollection* pCollection = nullptr;
+			if (pFontCollection) pCollection = pFontCollection;
+			m_pDWriteFactory->CreateTextFormat(szFontFamilyName, pCollection, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, baseSize, L"", &m_pTextFormat);
+			m_pDWriteFactory->CreateTextFormat(szFontFamilyName, pCollection, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, mediumSize, L"", &m_pMediumTextFormat);
+			m_pDWriteFactory->CreateTextFormat(szFontFamilyName, pCollection, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, smallSize, L"", &m_pSmallTextFormat);
+		}
 		break;
 	case WM_DISPLAYCHANGE:
 		InvalidateRect(hWnd, 0, 0);
@@ -1751,14 +1670,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				RECT rect;
 				GetClientRect(hWnd, &rect);
 				D2D1_SIZE_U size = D2D1::SizeU(rect.right, rect.bottom);
-
 				hr = m_pD2DFactory->CreateHwndRenderTarget(D2D1::RenderTargetProperties(D2D1_RENDER_TARGET_TYPE_DEFAULT, D2D1::PixelFormat(), DEFAULT_DPI, DEFAULT_DPI, D2D1_RENDER_TARGET_USAGE_NONE, D2D1_FEATURE_LEVEL_DEFAULT), D2D1::HwndRenderTargetProperties(hWnd, size), &m_pRenderTarget);
+				if (FAILED(hr))
+				{
+					hr = m_pD2DFactory->CreateHwndRenderTarget(D2D1::RenderTargetProperties(D2D1_RENDER_TARGET_TYPE_SOFTWARE, D2D1::PixelFormat(), DEFAULT_DPI, DEFAULT_DPI, D2D1_RENDER_TARGET_USAGE_NONE, D2D1_FEATURE_LEVEL_DEFAULT), D2D1::HwndRenderTargetProperties(hWnd, size), &m_pRenderTarget);
+				}
 				if (SUCCEEDED(hr))
 					hr = m_pRenderTarget->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::DimGray), &m_pBlackBrush);
 				if (SUCCEEDED(hr))
 					hr = m_pRenderTarget->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::LightGray), &m_pGrayBrush);
 				if (SUCCEEDED(hr))
 					hr = m_pRenderTarget->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Red), &m_pRedBrush);
+				if (SUCCEEDED(hr))
+					hr = m_pRenderTarget->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::DodgerBlue), &m_pBlueBrush);
+				if (SUCCEEDED(hr))
+					hr = m_pRenderTarget->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::LimeGreen), &m_pGreenBrush);
 			}
 			if (SUCCEEDED(hr))
 			{
@@ -1766,7 +1692,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				m_pRenderTarget->BeginDraw();
 				m_pRenderTarget->SetTransform(D2D1::Matrix3x2F::Identity());
 				m_pRenderTarget->Clear(D2D1::ColorF(D2D1::ColorF::WhiteSmoke));
-
 				if (g.nGameState == GAME_STATE::GS_GAMESTART)
 				{
 					if (0)
@@ -1786,17 +1711,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 								, &pTextLayout
 							);
 							pTextLayout->GetMetrics(&tTextMetrics);
-
 							m_pRenderTarget->DrawTextLayout(D2D1::Point2F(0.0F, 0.0F),
 								pTextLayout,
 								m_pBlackBrush,
 								D2D1_DRAW_TEXT_OPTIONS_NO_SNAP);
-
 							SafeRelease(&pTextLayout);
 						}
-
 					}
-
 					{// 問題文を表示
 						LPCWSTR lpszText = g.list[g.nQuestionCount % g.list.size()].words.c_str();
 						DWRITE_TEXT_METRICS tTextMetrics;
@@ -1811,17 +1732,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 								, &pTextLayout
 							);
 							pTextLayout->GetMetrics(&tTextMetrics);
-
 							m_pRenderTarget->DrawTextLayout(D2D1::Point2F(renderTargetSize.width / 2 - tTextMetrics.width / 2
 								, renderTargetSize.height / 2 - tTextMetrics.height / 2 - 2 * tTextMetrics.height),
 								pTextLayout,
 								m_pBlackBrush,
 								D2D1_DRAW_TEXT_OPTIONS_NO_SNAP);
-
 							SafeRelease(&pTextLayout);
 						}
 					}
-
 					{// カタカナを表示
 						LPCWSTR lpszText = g.list[g.nQuestionCount % g.list.size()].kana.c_str();
 						DWRITE_TEXT_METRICS tTextMetrics;
@@ -1836,20 +1754,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 								, &pTextLayout
 							);
 							pTextLayout->GetMetrics(&tTextMetrics);
-
 							DWRITE_TEXT_RANGE textRange = { 0, (UINT32)g.nCursorKana };
 							pTextLayout->SetDrawingEffect(m_pGrayBrush, textRange);
-
 							m_pRenderTarget->DrawTextLayout(D2D1::Point2F(renderTargetSize.width / 2 - tTextMetrics.width / 2
 								, renderTargetSize.height / 2 - tTextMetrics.height / 2),
 								pTextLayout,
 								m_pBlackBrush,
 								D2D1_DRAW_TEXT_OPTIONS_NO_SNAP);
-
 							SafeRelease(&pTextLayout);
 						}
 					}
-
 					{// ローマ字を表示
 						DWRITE_TEXT_METRICS tTextMetrics;
 						{
@@ -1875,7 +1789,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 								pTextLayout,
 								m_pBlackBrush,
 								D2D1_DRAW_TEXT_OPTIONS_NO_SNAP);
-
 							SafeRelease(&pTextLayout);
 						}
 					}
@@ -1895,13 +1808,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 							, &pTextLayout
 						);
 						pTextLayout->GetMetrics(&tTextMetrics);
-
 						m_pRenderTarget->DrawTextLayout(D2D1::Point2F(renderTargetSize.width / 2 - tTextMetrics.width / 2
 							, renderTargetSize.height / 2 - tTextMetrics.height / 2),
 							pTextLayout,
 							m_pBlackBrush,
 							D2D1_DRAW_TEXT_OPTIONS_NO_SNAP);
-
 						SafeRelease(&pTextLayout);
 					}
 				}
@@ -1924,19 +1835,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 							, &pTextLayout
 						);
 						pTextLayout->GetMetrics(&tTextMetrics);
-
 						m_pRenderTarget->DrawTextLayout(D2D1::Point2F(renderTargetSize.width / 2 - tTextMetrics.width / 2
 							, renderTargetSize.height / 2 - tTextMetrics.height / 2),
 							pTextLayout,
 							m_pBlackBrush,
 							D2D1_DRAW_TEXT_OPTIONS_NO_SNAP);
-
 						SafeRelease(&pTextLayout);
 					}
 				}
 				else if (g.nGameState == GAME_STATE::GS_TITLE)
 				{
-					LPCWSTR lpszText = L"タイトル画面\r\n\r\n[SPACE]キーで開始\r\n[R]キーでランキング\r\n[X]キーで終了";
+					LPCWSTR lpszText = L"[SPACE]キーで開始\r\n[R]キーでランキング\r\n[X]キーで終了";
 					DWRITE_TEXT_METRICS tTextMetrics;
 					{
 						IDWriteTextLayout* pTextLayout = NULL;
@@ -1950,8 +1859,73 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 						);
 						pTextLayout->GetMetrics(&tTextMetrics);
 
+						// --- ここからキーボード描画追加 ---
+						float kbWidth = renderTargetSize.width * 0.25f;
+						if (kbWidth < 300.0f) kbWidth = 300.0f;
+						float kbHeight = kbWidth * 0.35f; // アスペクト比を固定(1 : 0.35)
+
+						// 各種マージンや枠線の太さも幅に比例させる
+						float padding = kbWidth * 0.0125f;   // キーボード外枠の余白
+						float keyMargin = kbWidth * 0.0075f; // キー同士の隙間
+						float kbStroke = kbWidth * 0.0025f;  // キーボード外枠の線の太さ
+						float keyStroke = kbWidth * 0.00125f;// キーの線の太さ
+
+						float kbX = renderTargetSize.width / 2.0f - kbWidth / 2.0f;
+						// テキストや画面サイズに合わせてY座標も動的に隙間を空ける
+						float kbY = renderTargetSize.height / 2.0f - kbHeight / 2.0f - tTextMetrics.height / 2.0f - (renderTargetSize.height * 0.03f);
+
+						// キーボードベース（黒系）
+						D2D1_RECT_F kbRect = D2D1::RectF(kbX, kbY, kbX + kbWidth, kbY + kbHeight);
+						m_pRenderTarget->FillRectangle(&kbRect, m_pBlackBrush);
+						m_pRenderTarget->DrawRectangle(&kbRect, m_pBlackBrush, kbStroke);
+
+						// 各行のキーの相対幅 (単位: 1U = 通常キー1個分)
+						float rowWidths[5][15] = {
+							{ 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 2.0f, 0.0f },
+							{ 1.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.5f, 0.0f },
+							{ 1.75f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 2.25f, 0.0f, 0.0f },
+							{ 2.25f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 2.75f, 0.0f, 0.0f, 0.0f },
+							{ 1.25f, 1.25f, 1.25f, 6.25f, 1.25f, 1.25f, 1.25f, 1.25f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f }
+						};
+
+						int rows = 5;
+
+						// 内側の有効描画エリア
+						float innerWidth = kbWidth - padding * 2.0f;
+						float innerHeight = kbHeight - padding * 2.0f;
+						float rowHeight = innerHeight / rows;
+
+						for (int r = 0; r < rows; r++) {
+							float currentX = kbX + padding;
+							float currentY = kbY + padding + r * rowHeight;
+
+							for (int c = 0; c < 15; c++) {
+								float u = rowWidths[r][c];
+								if (u == 0.0f) break;
+
+								float cellWidth = innerWidth * (u / 15.0f);
+
+								D2D1_RECT_F keyRect = D2D1::RectF(
+									currentX + keyMargin / 2.0f,
+									currentY + keyMargin / 2.0f,
+									currentX + cellWidth - keyMargin / 2.0f,
+									currentY + rowHeight - keyMargin / 2.0f
+								);
+
+								m_pRenderTarget->FillRectangle(&keyRect, m_pGrayBrush);
+								m_pRenderTarget->DrawRectangle(&keyRect, m_pBlackBrush, keyStroke);
+
+								currentX += cellWidth;
+							}
+						}
+
+						// --- ここまでキーボード描画 ---
+
+						// 既存のテキストの描画位置調整（キーボードからの距離も動的に）
+						float textY = kbY + kbHeight + (renderTargetSize.height * 0.03f);
+
 						m_pRenderTarget->DrawTextLayout(D2D1::Point2F(renderTargetSize.width / 2 - tTextMetrics.width / 2
-							, renderTargetSize.height / 2 - tTextMetrics.height / 2),
+							, textY),
 							pTextLayout,
 							m_pBlackBrush,
 							D2D1_DRAW_TEXT_OPTIONS_NO_SNAP);
@@ -1977,13 +1951,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 								, &pTextLayout
 							);
 							pTextLayout->GetMetrics(&tTextMetrics);
-
 							m_pRenderTarget->DrawTextLayout(D2D1::Point2F(renderTargetSize.width / 2 - tTextMetrics.width / 2
 								, renderTargetSize.height / 2 - tTextMetrics.height / 2),
 								pTextLayout,
 								m_pBlackBrush,
 								D2D1_DRAW_TEXT_OPTIONS_NO_SNAP);
-
 							SafeRelease(&pTextLayout);
 						}
 					}
@@ -1991,24 +1963,227 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				else if (g.nGameState == GAME_STATE::GS_RANKING)
 				{
 					DWRITE_TEXT_METRICS tTextMetrics;
+					float halfHeight = renderTargetSize.height / 2.0f;
+					
+					// 1. テキストランキングを上部に描画
 					{
 						IDWriteTextLayout* pTextLayout = NULL;
 						hr = m_pDWriteFactory->CreateTextLayout(
-							ranking.c_str()
-							, (UINT32)ranking.length()
-							, m_pTextFormat
-							, renderTargetSize.width
-							, renderTargetSize.height
-							, &pTextLayout
-						);
+							ranking.c_str(), (UINT32)ranking.length(), m_pMediumTextFormat,
+							renderTargetSize.width, renderTargetSize.height, &pTextLayout); // ← halfHeight - 20.0f から変更
 						if (pTextLayout != nullptr) {
 							pTextLayout->GetMetrics(&tTextMetrics);
-							m_pRenderTarget->DrawTextLayout(D2D1::Point2F(renderTargetSize.width / 2 - tTextMetrics.width / 2
-								, renderTargetSize.height / 2 - tTextMetrics.height / 2),
-								pTextLayout,
-								m_pBlackBrush,
-								D2D1_DRAW_TEXT_OPTIONS_NO_SNAP);
+							m_pRenderTarget->DrawTextLayout(
+								D2D1::Point2F(renderTargetSize.width / 2.0f - tTextMetrics.width / 2.0f, 20.0f),
+								pTextLayout, m_pBlackBrush, D2D1_DRAW_TEXT_OPTIONS_NO_SNAP);
 							SafeRelease(&pTextLayout);
+						}
+					}
+
+					// 2. 過去5年分のグラフを下部に描画
+					if (rankingHistory.size() >= 2)
+					{
+						// 最も幅を取る「100%」の文字サイズを計測して余白を決定
+						float maxLabelWidth = 50.0f;
+						float labelHeight = 20.0f;
+						IDWriteTextLayout* pDummyLayout = NULL;
+						if (SUCCEEDED(m_pDWriteFactory->CreateTextLayout(L"100%", 4, m_pSmallTextFormat, 1000.0f, 100.0f, &pDummyLayout))) {
+							DWRITE_TEXT_METRICS tm;
+							pDummyLayout->GetMetrics(&tm);
+							maxLabelWidth = tm.width;
+							labelHeight = tm.height;
+							SafeRelease(&pDummyLayout);
+						}
+
+						// 文字の高さ(labelHeight)に比例した動的なマージンを計算
+						float margin = labelHeight * 0.5f;
+
+						// 左側の余白をしっかり確保（文字幅 + マージン2つ分）
+						float chartX = maxLabelWidth + margin * 2.0f;
+						float chartY = 20.0f + tTextMetrics.height + margin;
+						float chartW = renderTargetSize.width - chartX - margin * 2.0f;
+
+						// --- ここから変更 ---
+						// 下部の余白: 年号テキスト分 + 凡例テキスト分 + 隙間
+						float bottomPadding = labelHeight * 2.5f + margin * 2.0f;
+						float chartH = renderTargetSize.height - chartY - bottomPadding;
+						// --- ここまで変更 ---
+
+						if (chartH < 50.0f) chartH = 50.0f;
+						double minDate = rankingHistory[0].date;
+						double maxDate = rankingHistory[rankingHistory.size() - 1].date;
+						if (maxDate == minDate) maxDate = minDate + 1.0;
+						
+						double maxScore = 1.0;
+						for (auto& item : rankingHistory) {
+							if (item.score > maxScore) maxScore = item.score;
+						}
+
+						// X,Y軸
+						m_pRenderTarget->DrawLine(D2D1::Point2F(chartX, chartY), D2D1::Point2F(chartX, chartY + chartH), m_pBlackBrush, 2.0f);
+						m_pRenderTarget->DrawLine(D2D1::Point2F(chartX, chartY + chartH), D2D1::Point2F(chartX + chartW, chartY + chartH), m_pBlackBrush, 2.0f);
+
+						// Y軸グリッド(10%ごとの正答率目安線)
+						IDWriteTextLayout* pLabelLayout = NULL;
+						for (int pct = 50; pct <= 100; pct += 10) { // 0から50スタートに変更
+							float yGrid = chartY + chartH - (float)((pct - 50) / 50.0) * chartH; // 計算式を変更
+							if (pct > 50 && pct < 100) { // 0より大きいの条件を50より大きいへ変更
+								m_pRenderTarget->DrawLine(D2D1::Point2F(chartX, yGrid), D2D1::Point2F(chartX + chartW, yGrid), m_pGrayBrush, 0.5f);
+							}
+							WCHAR szLbl[32];
+							wsprintf(szLbl, L"%d%%", pct);
+
+							// 枠を十分に大きくして改行を防ぐ
+							if (SUCCEEDED(m_pDWriteFactory->CreateTextLayout(szLbl, lstrlenW(szLbl), m_pSmallTextFormat, 1000.0f, 100.0f, &pLabelLayout))) {
+								pLabelLayout->GetMetrics(&tTextMetrics);
+
+								// グラフのY軸から margin 分だけ左に離して配置する
+								float labelX = chartX - tTextMetrics.width - margin;
+								float labelY = yGrid - tTextMetrics.height / 2.0f;
+
+								m_pRenderTarget->DrawTextLayout(D2D1::Point2F(labelX, labelY), pLabelLayout, m_pGrayBrush, D2D1_DRAW_TEXT_OPTIONS_NO_SNAP);
+								SafeRelease(&pLabelLayout);
+							}
+						}
+
+						// X軸グリッド(年の切り替わり)
+						int lastYear = -1;
+						for (size_t i = 0; i < rankingHistory.size(); i++) {
+							SYSTEMTIME st;
+							VariantTimeToSystemTime(rankingHistory[i].date, &st);
+							if (st.wYear != lastYear) {
+								lastYear = st.wYear;
+								float xYear = chartX + (float)((rankingHistory[i].date - minDate) / (maxDate - minDate)) * chartW;
+								m_pRenderTarget->DrawLine(D2D1::Point2F(xYear, chartY), D2D1::Point2F(xYear, chartY + chartH), m_pGrayBrush, 0.5f);
+
+								WCHAR szYear[32];
+								wsprintf(szYear, L"%d年", st.wYear);
+
+								if (SUCCEEDED(m_pDWriteFactory->CreateTextLayout(szYear, lstrlenW(szYear), m_pSmallTextFormat, 1000.0f, 100.0f, &pLabelLayout))) {
+									pLabelLayout->GetMetrics(&tTextMetrics);
+
+									float labelX = xYear - tTextMetrics.width / 2.0f;
+									// X軸のすぐ下に配置
+									float labelY = chartY + chartH + (margin * 0.5f);
+
+									m_pRenderTarget->DrawTextLayout(D2D1::Point2F(labelX, labelY), pLabelLayout, m_pGrayBrush, D2D1_DRAW_TEXT_OPTIONS_NO_SNAP);
+									SafeRelease(&pLabelLayout);
+								}
+							}
+						}
+
+						// 折れ線描画
+						double minScore = maxScore / 2.0;
+
+						// グラフ範囲外にはみ出さないよう、0.0〜1.0に丸めるヘルパー関数
+						auto getClampRatio = [](double val, double min_val, double max_val) {
+							if (max_val <= min_val) return 0.0;
+							double ratio = (val - min_val) / (max_val - min_val);
+							if (ratio < 0.0) return 0.0;
+							if (ratio > 1.0) return 1.0;
+							return ratio;
+							};
+
+						for (size_t i = 0; i < rankingHistory.size() - 1; i++) {
+							const auto& p1 = rankingHistory[i];
+							const auto& p2 = rankingHistory[i + 1];
+
+							float x1 = chartX + (float)((p1.date - minDate) / (maxDate - minDate)) * chartW;
+							float x2 = chartX + (float)((p2.date - minDate) / (maxDate - minDate)) * chartW;
+
+							// minScore 〜 maxScore で計算
+							float y1Score = chartY + chartH - (float)getClampRatio(p1.score, minScore, maxScore) * chartH;
+							float y2Score = chartY + chartH - (float)getClampRatio(p2.score, minScore, maxScore) * chartH;
+
+							// 50.0 〜 100.0 で計算
+							float y1Acc = chartY + chartH - (float)getClampRatio(p1.accuracy, 50.0, 100.0) * chartH;
+							float y2Acc = chartY + chartH - (float)getClampRatio(p2.accuracy, 50.0, 100.0) * chartH;
+
+							m_pRenderTarget->DrawLine(D2D1::Point2F(x1, y1Score), D2D1::Point2F(x2, y2Score), m_pBlueBrush, 1.5f);
+							m_pRenderTarget->DrawLine(D2D1::Point2F(x1, y1Acc), D2D1::Point2F(x2, y2Acc), m_pGreenBrush, 1.5f);
+						}
+
+						// ホバーツールチップ
+						int hoveredIndex = -1;
+						float minHoverDist = 10000.0f;
+						for (size_t i = 0; i < rankingHistory.size(); i++) {
+							float px = chartX + (float)((rankingHistory[i].date - minDate) / (maxDate - minDate)) * chartW;
+							float pyAcc = chartY + chartH - (float)getClampRatio(rankingHistory[i].accuracy, 50.0, 100.0) * chartH;
+							float pyScore = chartY + chartH - (float)getClampRatio(rankingHistory[i].score, minScore, maxScore) * chartH;
+
+							float distAccSq = (px - ptMouse.x) * (px - ptMouse.x) + (pyAcc - ptMouse.y) * (pyAcc - ptMouse.y);
+							float distScoreSq = (px - ptMouse.x) * (px - ptMouse.x) + (pyScore - ptMouse.y) * (pyScore - ptMouse.y);
+
+							float distSq = distAccSq < distScoreSq ? distAccSq : distScoreSq;
+							if (distSq < 100.0f && distSq < minHoverDist) {
+								hoveredIndex = (int)i;
+								minHoverDist = distSq;
+							}
+						}
+
+						if (hoveredIndex != -1) {
+							SYSTEMTIME st;
+							VariantTimeToSystemTime(rankingHistory[hoveredIndex].date, &st);
+							WCHAR szTooltip[256];
+							swprintf(szTooltip, L"%04d/%02d/%02d\nポイント: %d\n正答率: %.1f%%", st.wYear, st.wMonth, st.wDay, (int)rankingHistory[hoveredIndex].score, rankingHistory[hoveredIndex].accuracy);
+							
+							IDWriteTextLayout* pTooltipLayout = NULL;
+							if (SUCCEEDED(m_pDWriteFactory->CreateTextLayout(szTooltip, lstrlenW(szTooltip), m_pSmallTextFormat, 300, 100, &pTooltipLayout))) {
+								pTooltipLayout->GetMetrics(&tTextMetrics);
+
+								// 基本はマウスカーソルの左側に配置する
+								float tipX = (float)ptMouse.x - 15.0f - tTextMetrics.width;
+								float tipY = (float)ptMouse.y + 15.0f;
+
+								// 左端ではみ出す場合は、カーソルの右側に配置する
+								if (tipX - 5.0f < 0.0f) {
+									tipX = (float)ptMouse.x + 15.0f;
+								}
+
+								// 下端ではみ出す場合は、カーソルの上側に配置する
+								if (tipY + tTextMetrics.height + 5.0f > renderTargetSize.height) {
+									tipY = (float)ptMouse.y - 15.0f - tTextMetrics.height;
+								}
+
+								D2D1_RECT_F bgRect = D2D1::RectF(tipX - 5.0f, tipY - 5.0f, tipX + tTextMetrics.width + 5.0f, tipY + tTextMetrics.height + 5.0f);								ID2D1SolidColorBrush* pBgBrush = NULL;
+								m_pRenderTarget->CreateSolidColorBrush(D2D1::ColorF(0.0f, 0.0f, 0.0f, 0.8f), &pBgBrush);
+								if (pBgBrush) {
+									m_pRenderTarget->FillRectangle(&bgRect, pBgBrush);
+									SafeRelease(&pBgBrush);
+								}
+								
+								ID2D1SolidColorBrush* pWhiteBrush = NULL;
+								m_pRenderTarget->CreateSolidColorBrush(D2D1::ColorF(1.0f, 1.0f, 1.0f, 1.0f), &pWhiteBrush);
+								if (pWhiteBrush) {
+									m_pRenderTarget->DrawTextLayout(D2D1::Point2F(tipX, tipY), pTooltipLayout, pWhiteBrush, D2D1_DRAW_TEXT_OPTIONS_NO_SNAP);
+									SafeRelease(&pWhiteBrush);
+								}
+								SafeRelease(&pTooltipLayout);
+							}
+						}
+
+						// 凡例
+						std::wstring legend = L"■ 獲得ポイント (Max: " + std::to_wstring((int)maxScore) + L")  ■ 正答率 (推移)";
+						IDWriteTextLayout* pLegendLayout = NULL;
+						hr = m_pDWriteFactory->CreateTextLayout(legend.c_str(), (UINT32)legend.length(), m_pSmallTextFormat, chartW, 100.0f, &pLegendLayout);
+						if (pLegendLayout) {
+							DWRITE_TEXT_RANGE rangeBlue = { 0, 1 };
+							size_t greenPos = legend.find(L"■", 1);
+							DWRITE_TEXT_RANGE rangeGreen = { (UINT32)greenPos, 1 };
+
+							pLegendLayout->SetDrawingEffect(m_pBlueBrush, rangeBlue);
+							if (greenPos != std::wstring::npos) pLegendLayout->SetDrawingEffect(m_pGreenBrush, rangeGreen);
+
+							pLegendLayout->GetMetrics(&tTextMetrics);
+
+							// --- ここから変更 ---
+							// ウィンドウの下端から上にオフセットして配置（見切れを確実に防ぐ）
+							float legendY = renderTargetSize.height - tTextMetrics.height - margin;
+							// --- ここまで変更 ---
+
+							m_pRenderTarget->DrawTextLayout(D2D1::Point2F(renderTargetSize.width / 2.0f - tTextMetrics.width / 2.0f, legendY),
+								pLegendLayout, m_pBlackBrush, D2D1_DRAW_TEXT_OPTIONS_NO_SNAP);
+							SafeRelease(&pLegendLayout);
 						}
 					}
 				}
@@ -2019,6 +2194,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					SafeRelease(&m_pBlackBrush);
 					SafeRelease(&m_pGrayBrush);
 					SafeRelease(&m_pRedBrush);
+					SafeRelease(&m_pBlueBrush);
+					SafeRelease(&m_pGreenBrush);
 				}
 			}
 		}
@@ -2066,9 +2243,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				wsprintf(szInput, L"%c", wParam);
 				lstrcat(g.szInputRome, szInput);
 				debuglog(L"szInputRome = %s\r\n", g.szInputRome);
-
 				g.nTypeCountRome++;
-
 				if (g.szQuestionKana[g.nCursorKana] == g.szInputRome[0]) // 英字
 				{
 					g.bMiss = FALSE;
@@ -2095,30 +2270,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 						g.szInputRome[1] = 0;
 						debuglog(L"szInputRome(after) = %s\r\n", g.szInputRome);
 					}
-
 					WCHAR szOutputKana[4] = {};
 					WCHAR szOutputRome[5] = {};
 					BOOL bRet = JudgeFromKana(g.szInputRome, g.szQuestionKana, g.nCursorKana, szOutputKana, szOutputRome);
 					if (bRet)
 					{
 						g.bMiss = FALSE;
-
 						if (g.szQuestionRome[g.nCursorRome] != szInput[0])
 						{
 							lstrcpy(&(g.szQuestionRome[g.nCursorRome - lstrlen(g.szInputRome) + 1]), szOutputRome);
 							lstrcat(g.szQuestionRome, g.GetRomeFromKana(&(g.szQuestionKana[g.nCursorKana + lstrlen(szOutputKana)])));
 						}
-
 						g.nCursorRome++;
 						PlaySound(0);
-
 						debuglog(L"szOutput = %s\r\n", szOutputKana);
 						if (L'A' == wParam || L'I' == wParam || L'U' == wParam || L'E' == wParam || L'O' == wParam || (g.szInputRome[0] == L'N' && g.szInputRome[1] == L'N'))
 						{
 							// 母音またはNを2回入力した場合は、ローマ字入力を確定させ次の文字に移る。
 							g.nCursorKana += lstrlen(szOutputKana);
 							g.nTypeCountKana += lstrlen(szOutputKana);
-
 							g.szInputRome[0] = 0;
 							if (g.szQuestionKana[g.nCursorKana] == L'\0')
 							{
@@ -2165,6 +2335,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			else if (wParam == 'R')
 			{
 				GetRankingFromDatabase(ranking, 1);
+				GetRankingHistoryFromDatabase(rankingHistory, 1);
 				g.nGameState = GS_RANKING;
 				PlaySound(5);
 				InvalidateRect(hWnd, 0, 0);
@@ -2187,6 +2358,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			else if (wParam == 'R')
 			{
 				GetRankingFromDatabase(ranking, 1);
+				GetRankingHistoryFromDatabase(rankingHistory, 1);
 				g.nGameState = GS_RANKING;
 				PlaySound(5);
 				InvalidateRect(hWnd, 0, 0);
@@ -2236,6 +2408,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		SafeRelease(&m_pDWriteFactory);
 		SafeRelease(&m_pRenderTarget);
 		SafeRelease(&m_pTextFormat);
+		SafeRelease(&m_pMediumTextFormat); // 追加
+		SafeRelease(&m_pSmallTextFormat);  // 追加
 		SafeRelease(&m_pBlackBrush);
 		SafeRelease(&m_pGrayBrush);
 		SafeRelease(&m_pRedBrush);
@@ -2248,7 +2422,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	}
 	return 0;
 }
-
 int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nShowCmd)
 {
 	// グローバル文字列を初期化する
@@ -2281,12 +2454,16 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 		hInstance,
 		0
 	);
+	if (!hWnd) return FALSE;
 	DSBUFFERDESC dsbd = {};
 	IDirectSound* ds[MAX_SOUND_COUNT];
 	for (int i = 0; i < MAX_SOUND_COUNT; i++)
 	{
-		DirectSoundCreate(NULL, &(ds[i]), NULL);
-		(ds[i])->SetCooperativeLevel(hWnd, DSSCL_NORMAL);
+		ds[i] = nullptr;
+		dsb1[i] = nullptr;
+		if (SUCCEEDED(DirectSoundCreate(NULL, &(ds[i]), NULL)))
+		{
+			(ds[i])->SetCooperativeLevel(hWnd, DSSCL_NORMAL);
 		dsbd.dwSize = sizeof(DSBUFFERDESC);
 		dsbd.dwFlags = DSBCAPS_STATIC | DSBCAPS_CTRLPAN | DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLFREQUENCY;
 		HRSRC hrsrc = FindResource(hInstance, MAKEINTRESOURCE(nSoundResourceID[i]), TEXT("WAVE"));
@@ -2302,13 +2479,18 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 					DWORD dwSize1, dwSize2;
 					dsbd.dwBufferBytes = *(pRData + 10);
 					dsbd.lpwfxFormat = (LPWAVEFORMATEX)(pRData + 5);
-					(ds[i])->CreateSoundBuffer(&dsbd, &(dsb1[i]), NULL);
-					(dsb1[i])->Lock(0, dsbd.dwBufferBytes, (void**)&pMem1, &dwSize1, (void**)&pMem2, &dwSize2, 0);
-					memcpy(pMem1, (LPBYTE)(pRData + 11), dwSize1);
-					if (dwSize2 != 0) memcpy(pMem2, (LPBYTE)(pRData + 11) + dwSize1, dwSize2);
-					(dsb1[i])->Unlock(pMem1, dwSize1, pMem2, dwSize2);
+					if (SUCCEEDED((ds[i])->CreateSoundBuffer(&dsbd, &(dsb1[i]), NULL)))
+					{
+						if (SUCCEEDED((dsb1[i])->Lock(0, dsbd.dwBufferBytes, (void**)&pMem1, &dwSize1, (void**)&pMem2, &dwSize2, 0)))
+						{
+							memcpy(pMem1, (LPBYTE)(pRData + 11), dwSize1);
+							if (dwSize2 != 0) memcpy(pMem2, (LPBYTE)(pRData + 11) + dwSize1, dwSize2);
+							(dsb1[i])->Unlock(pMem1, dwSize1, pMem2, dwSize2);
+						}
+					}
 				}
 			}
+		}
 		}
 	}
 	ShowWindow(hWnd, SW_SHOWDEFAULT);
@@ -2320,7 +2502,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 	}
 	for (auto i : ds)
 	{
-		i->Release();
+		if (i) i->Release();
 	}
 	return (int)msg.wParam;
 }
